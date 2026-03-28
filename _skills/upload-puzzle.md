@@ -112,6 +112,19 @@ Also set `published_at` in the puzzles table at this time:
 db.prepare('UPDATE puzzles SET published_at=? WHERE name=?').run(Math.floor(Date.now()/1000), puzzleName);
 ```
 
+## License
+All puzzles published on rebel-the-dog.com are licensed under **CC BY-SA 4.0**.
+Include this in every puzzle page footer:
+```html
+<p>This puzzle is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.</p>
+```
+
+## Crossword source files
+Puzzles are authored in CrosswordCompiler (.ccw files on OneDrive).
+- The internal puzzle title (inside the .ccw) is the canonical title — never assume the filename matches.
+- Export to .puz (Across Lite) format to parse the grid and clues programmatically.
+- Use the existing `read_puz.js` parser at `C:/Users/tiwescot/PersonalAI/read_puz.js`.
+
 ## Notes
 - NEVER invent puzzle names, clue text, themes, or difficulty ratings — always ask the user.
 - `puzzle_clues.db` is tracked in the `xword-db` GitHub repo. Commit and push it after updates.
