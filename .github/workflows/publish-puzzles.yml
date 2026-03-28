@@ -1,0 +1,57 @@
+name: Publish Puzzle
+
+on:
+  schedule:
+    # Sunday 07:00 UTC = midnight Pacific (PDT, UTC-7)
+    - cron: '0 7 * * 0'
+    # Monday 07:00 UTC = midnight Pacific (PDT, UTC-7)
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Puzzle type'
+        required: true
+        type: choice
+        options:
+          - find-it
+          - crossword
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Determine puzzle type
+        id: puzzle_type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ github.event.inputs.type }}" >> $GITHUB_OUTPUT
+          else
+            # 0=Sunday in cron, but date +%u gives 1=Mon..7=Sun
+            DAY=$(date -u +%u)
+            if [ "$DAY" = "7" ]; then
+              echo "type=crossword" >> $GITHUB_OUTPUT
+            else
+              echo "type=find-it" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Run publish script
+        run: node _scripts/publish.js ${{ steps.puzzle_type.outputs.type }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "Rebel the Dog Bot"
+          git config user.email "noreply@rebel-the-dog.com"
+          git add puzzles.html _data/queue.json
+          git diff --staged --quiet && echo "Nothing to commit." || \
+            git commit -m "Publish ${{ steps.puzzle_type.outputs.type }} puzzle [skip ci]"
+          git push
