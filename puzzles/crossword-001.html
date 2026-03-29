@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 49665 bytes
+File size: 50845 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -254,8 +254,8 @@ ontent="width=device-width, initial-scale=1.0">
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <!-- Hidden input for keyboard capture -->
-  <input id="xw-input" type="text" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <!-- Hidden input for keyboard capture (positioned at selected cell so iOS scrolls correctly) -->
+  <input id="xw-input" type="text" inputmode="text" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:none;padding:0;margin:0;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
 <script>
 // ============================================================
@@ -449,6 +449,7 @@ function onCellClick(r, c) {
   selDownIdx = cellDownIdx[`${r},${c}`] !== undefined ? cellDownIdx[`${r},${c}`] : -1;
 
   applyHighlights();
+  cellEls[selRow][selCol].scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
 }
 
 function selectWord(dir, idx) {
@@ -464,6 +465,7 @@ function selectWord(dir, idx) {
   selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
   selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
   applyHighlights();
+  cellEls[selRow][selCol].scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
   focusInput();
 }
 
@@ -473,8 +475,30 @@ function selectWord(dir, idx) {
 const inputEl = document.getElementById('xw-input');
 
 function focusInput() {
+  // Move hidden input to selected cell so iOS positions the keyboard below it
+  if (selRow >= 0 && selCol >= 0) {
+    const rect = cellEls[selRow][selCol].getBoundingClientRect();
+    inputEl.style.top  = (window.scrollY + rect.top  + rect.height / 2) + 'px';
+    inputEl.style.left = (window.scrollX + rect.left + rect.width  / 2) + 'px';
+  }
+  inputEl.value = '';
   inputEl.focus();
 }
+
+// Mobile: beforeinput fires reliably for backspace on virtual keyboards
+inputEl.addEventListener('beforeinput', e => {
+  if (e.inputType === 'deleteContentBackward') {
+    e.preventDefault();
+    if (selRow >= 0) handleBackspace();
+  }
+});
+
+// Mobile: input event fires when virtual keyboard commits a character
+inputEl.addEventListener('input', () => {
+  const ch = inputEl.value.replace(/[^a-zA-Z]/g, '');
+  inputEl.value = '';
+  if (ch && selRow >= 0) handleLetter(ch[ch.length - 1].toUpperCase());
+});
 
 document.addEventListener('keydown', onKeyDown);
 
