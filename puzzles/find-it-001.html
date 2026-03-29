@@ -114,6 +114,11 @@
     const MAX_GUESSES = 6;
     const WORD_LEN    = 5;
 
+    let validWords = null;
+    fetch('puzzles/find-it-words.json')
+      .then(r => r.json())
+      .then(words => { validWords = new Set(words); });
+
     let currentRow = 0, currentCol = 0;
     let currentGuess = [];
     let gameOver = false;
@@ -216,6 +221,15 @@
       }
 
       const guess  = currentGuess.join('');
+
+      if (validWords && !validWords.has(guess) && guess !== ANSWER) {
+        document.getElementById('row-' + currentRow).classList.remove('shake');
+        void document.getElementById('row-' + currentRow).offsetWidth;
+        document.getElementById('row-' + currentRow).classList.add('shake');
+        showToast('Not a word');
+        return;
+      }
+
       const result = evaluate(guess);
 
       // Flip tiles with staggered delay
