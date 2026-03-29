@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 59359 bytes
+File size: 59617 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -984,13 +984,18 @@ function clearPuzzle() {
 }
 
 function checkComplete() {
+  let allFilled = true, allCorrect = true;
   for (let r = 0; r < H; r++) {
     for (let c = 0; c < W; c++) {
       if (PUZZLE.grid[r][c].black) continue;
-      if (userGrid[r][c] !== getSolution(r, c)) return;
+      if (!userGrid[r][c]) { allFilled = false; break; }
+      if (userGrid[r][c] !== getSolution(r, c)) allCorrect = false;
     }
+    if (!allFilled) break;
   }
-  showToast('Puzzle complete! Well done!');
+  if (!allFilled) return;
+  if (allCorrect) showToast('Puzzle complete! Well done!');
+  else showToast('Puzzle filled in — but something’s not quite right!');
 }
 
 function showToast(msg) {
