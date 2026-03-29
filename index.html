@@ -69,35 +69,49 @@
   </div>
 
   <main class="max-w-5xl mx-auto px-5 py-14">
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
 
-    <!-- Latest Posts -->
-    <section class="mb-14">
-      <div class="flex items-baseline justify-between border-b-2 border-sky-200 pb-3 mb-7">
-        <h2 class="font-serif text-2xl font-bold">Latest Posts</h2>
-        <a href="posts/" class="text-[#c47f17] hover:text-[#c47f17]-dark text-sm font-semibold transition-colors">All posts &rarr;</a>
+      <!-- Main content -->
+      <div class="flex-1 min-w-0">
+
+        <!-- Latest Posts -->
+        <section class="mb-14">
+          <div class="flex items-baseline justify-between border-b-2 border-sky-200 pb-3 mb-7">
+            <h2 class="font-serif text-2xl font-bold">Latest Posts</h2>
+            <a href="posts/" class="text-[#c47f17] hover:text-[#c47f17]-dark text-sm font-semibold transition-colors">All posts &rarr;</a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-8 flex items-center justify-center text-sky-200 font-sans text-sm italic col-span-full min-h-[120px]">
+              No posts yet &mdash; check back soon!
+            </div>
+          </div>
+        </section>
+
+        <!-- Latest Puzzles -->
+        <section>
+          <div class="flex items-baseline justify-between border-b-2 border-sky-200 pb-3 mb-7">
+            <h2 class="font-serif text-2xl font-bold">Latest Puzzles</h2>
+            <a href="puzzles.html" class="text-[#c47f17] hover:text-[#c47f17]-dark text-sm font-semibold transition-colors">All puzzles &rarr;</a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-8 flex items-center justify-center text-stone-400 font-sans text-sm italic col-span-full min-h-[120px]">
+              No puzzles yet &mdash; check back soon!
+            </div>
+          </div>
+        </section>
+
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-8 flex items-center justify-center text-sky-200 font-sans text-sm italic col-span-full min-h-[120px]">
-          No posts yet &mdash; check back soon!
-        </div>
-      </div>
-    </section>
 
-    <!-- Latest Puzzles -->
-    <section>
-      <div class="flex items-baseline justify-between border-b-2 border-sky-200 pb-3 mb-7">
-        <h2 class="font-serif text-2xl font-bold">Latest Puzzles</h2>
-        <a href="puzzles.html" class="text-[#c47f17] hover:text-[#c47f17]-dark text-sm font-semibold transition-colors">All puzzles &rarr;</a>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Sidebar -->
+      <aside class="w-full lg:w-52 shrink-0">
+        <a href="https://growlerzseattle.com/" target="_blank" rel="noopener"
+           class="block rounded-xl border border-sky-200 bg-white shadow-sm hover:shadow-md transition-shadow p-4 text-center">
+          <img src="images/growlerz-logo.png" alt="Growlerz" class="w-full rounded-lg mb-3">
+          <p class="text-sm text-stone-600 leading-snug">Rebel can often be found at Growlerz!</p>
+        </a>
+      </aside>
 
-        <div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-8 flex items-center justify-center text-stone-400 font-sans text-sm italic col-span-full min-h-[120px]">
-          No puzzles yet &mdash; check back soon!
-        </div>
-
-      </div>
-    </section>
-
+    </div>
   </main>
 
   <footer class="bg-[#1e3a5f] mt-20">
