@@ -4,7 +4,7 @@
   <base href="https://rebel-the-dog.com/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find It! #1 &bull; Rebel the Dog</title>
+  <title>Find It! &bull; Rebel the Dog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -88,17 +88,12 @@
 
   <main>
     <div class="max-w-lg mx-auto px-4 py-10 text-center">
-      <h1 class="font-serif text-4xl font-bold mb-1">Find It! <span class="text-[#9b2226]">#1</span></h1>
+      <h1 class="font-serif text-4xl font-bold mb-1">Find It!</h1>
       <p class="text-stone-500 text-sm mb-8">Guess the 5-letter word &mdash; 6 tries</p>
 
       <div id="grid" class="flex flex-col gap-1.5 items-center mb-8"></div>
       <div id="keyboard" class="flex flex-col gap-1.5 items-center"></div>
 
-      <div id="share-area" class="hidden mt-8">
-        <button id="share-btn" class="bg-[#9b2226] hover:bg-[#7a1a1e] text-white font-semibold px-8 py-3 rounded-full text-sm transition-colors">
-          Share Result
-        </button>
-      </div>
     </div>
   </main>
 
@@ -255,11 +250,9 @@
           gameOver = true;
           const msgs = ['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'];
           showToast(msgs[currentRow - 1] || 'Nice!', 3000);
-          setTimeout(() => document.getElementById('share-area').classList.remove('hidden'), 800);
         } else if (currentRow >= MAX_GUESSES) {
           gameOver = true;
           showToast(ANSWER, 4000);
-          setTimeout(() => document.getElementById('share-area').classList.remove('hidden'), 800);
         }
       }, WORD_LEN * 80 + 300);
     }
@@ -279,14 +272,6 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => el.classList.remove('show'), duration);
     }
-
-    // ── Share ─────────────────────────────────────────────────────────────
-    document.getElementById('share-btn').addEventListener('click', () => {
-      const icons = { correct: '\uD83D\uDFE9', present: '\uD83D\uDFE8', absent: '\u2B1B' };
-      const grid  = guesses.map(g => evaluate(g).map(s => icons[s]).join('')).join('\n');
-      const text  = 'Find It! #1 ' + guesses.length + '/' + MAX_GUESSES + '\n\n' + grid + '\n\nhttps://rebel-the-dog.com';
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
-    });
 
     // ── Physical keyboard ─────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
