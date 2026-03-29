@@ -1,6 +1,8 @@
-Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 50845 bytes
-ontent="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,9 +138,127 @@ ontent="width=device-width, initial-scale=1.0">
     }
     .toast.show { opacity: 1; }
 
-    @media (max-width: 640px) {
-      .xw-grid { touch-action: manipulation; }
+    /* ── Mobile layout (< 768px) ───────────────────────────── */
+    @media (max-width: 767px) {
+      #active-clue-bar  { display: none !important; }
+      #clue-panels      { display: none !important; }
+      #mob-clue-nav     { display: flex; }
+      #mob-kb           { display: flex; }
+      main              { padding-bottom: 180px; }
     }
+    @media (min-width: 768px) {
+      #mob-clue-nav { display: none; }
+      #mob-kb       { display: none; }
+    }
+
+    /* Mobile clue nav */
+    #mob-clue-nav {
+      position: sticky;
+      top: 56px;
+      z-index: 40;
+      background: #1e3a5f;
+      color: white;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 8px;
+      margin: 0 -1rem 12px;
+    }
+    #mob-clue-text {
+      flex: 1;
+      font-size: 0.8rem;
+      line-height: 1.3;
+      text-align: left;
+      padding: 0 4px;
+      min-width: 0;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mob-nav-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.4rem;
+      line-height: 1;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .mob-nav-btn:active { background: #162d4a; }
+    .mob-clues-btn {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid #93c5fd;
+      border-radius: 4px;
+      background: none;
+      color: white;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .mob-clues-btn:active { background: #162d4a; }
+
+    /* Mobile keyboard */
+    #mob-kb {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #d1d5db;
+      padding: 6px 4px env(safe-area-inset-bottom, 8px);
+      flex-direction: column;
+      gap: 5px;
+      z-index: 100;
+    }
+    .mob-kb-row {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .mob-key {
+      flex: 1;
+      height: 44px;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #111827;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .mob-key:active { background: #b0b7bf; transform: scale(0.95); }
+    .mob-key.wide { flex: 1.6; font-size: 0.72rem; }
+
+    /* Clue drawer */
+    #clue-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+    }
+    #clue-drawer.open { display: block; }
+    #clue-drawer-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+    }
+    #clue-drawer-sheet {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      max-height: 75vh;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+    }
+    #clue-drawer-sheet .clue-item { font-size: 0.8rem; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -161,17 +281,25 @@ ontent="width=device-width, initial-scale=1.0">
   </nav>
 
   <!-- Header -->
-  <header class="bg-navy text-white py-8 px-4 text-center">
-    <h1 class="font-serif text-3xl md:text-4xl font-bold mb-2">In the Beginning...</h1>
-    <p class="text-blue-100 text-sm">By Rebel's Dad</p>
+  <header class="bg-navy text-white py-3 md:py-8 px-4 text-center">
+    <h1 class="font-serif text-2xl md:text-4xl font-bold mb-1">In the Beginning...</h1>
+    <p class="text-blue-100 text-sm hidden md:block">By Rebel's Dad</p>
   </header>
 
   <!-- Main content -->
   <main class="max-w-5xl mx-auto px-4 py-6">
 
-    <!-- Mobile active clue bar -->
+    <!-- Desktop active clue bar -->
     <div id="active-clue-bar" class="mb-3 md:hidden">
       <span id="active-clue-text">Select a cell to begin</span>
+    </div>
+
+    <!-- Mobile clue nav (sticky below nav, custom keyboard replaces OS kb) -->
+    <div id="mob-clue-nav">
+      <button class="mob-nav-btn" onclick="cycleClue(-1)" aria-label="Previous clue">‹</button>
+      <button id="mob-clue-text" class="mob-clue-text" onclick="toggleSelDir()">Select a cell</button>
+      <button class="mob-nav-btn" onclick="cycleClue(1)" aria-label="Next clue">›</button>
+      <button class="mob-clues-btn" onclick="openClueDrawer()">Clues</button>
     </div>
 
     <!-- Buttons -->
@@ -222,8 +350,8 @@ ontent="width=device-width, initial-scale=1.0">
         <div class="xw-grid" id="xw-grid" role="grid" aria-label="Crossword grid"></div>
       </div>
 
-      <!-- Clue panels -->
-      <div class="flex-1 flex flex-col sm:flex-row md:flex-col gap-4 overflow-y-auto" style="max-height: 600px;">
+      <!-- Clue panels (desktop only; mobile uses drawer) -->
+      <div id="clue-panels" class="flex-1 flex flex-col sm:flex-row md:flex-col gap-4 overflow-y-auto" style="max-height: 600px;">
 
         <!-- Across -->
         <div class="flex-1">
@@ -253,6 +381,30 @@ ontent="width=device-width, initial-scale=1.0">
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+
+  <!-- Mobile custom keyboard -->
+  <div id="mob-kb"></div>
+
+  <!-- Mobile clue drawer -->
+  <div id="clue-drawer">
+    <div id="clue-drawer-bg" onclick="closeClueDrawer()"></div>
+    <div id="clue-drawer-sheet">
+      <div class="sticky top-0 bg-white pt-4 pb-3 flex items-center justify-between border-b border-gray-200 mb-3">
+        <h3 class="font-serif font-bold text-navy text-lg">Clues</h3>
+        <button onclick="closeClueDrawer()" class="text-gray-400 text-3xl leading-none hover:text-gray-600">&times;</button>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <h4 class="font-serif font-bold text-navy border-b border-navy pb-1 mb-2 text-sm">Across</h4>
+          <div id="mob-across-list"></div>
+        </div>
+        <div class="flex-1">
+          <h4 class="font-serif font-bold text-navy border-b border-navy pb-1 mb-2 text-sm">Down</h4>
+          <div id="mob-down-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Hidden input for keyboard capture (positioned at selected cell so iOS scrolls correctly) -->
   <input id="xw-input" type="text" inputmode="text" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:none;padding:0;margin:0;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
@@ -387,7 +539,7 @@ function applyHighlights() {
   const st = cellState[selRow][selCol];
   cellEls[selRow][selCol].className = 'xw-cell ' + baseClass(selRow,selCol) + ' selected' + (st ? ' ' + st : '');
 
-  // Highlight clue
+  // Highlight clue (desktop + drawer)
   const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
   if (wordIdx >= 0) {
     const clueEl = document.getElementById(`clue-${selDir}-${wordIdx}`);
@@ -395,6 +547,8 @@ function applyHighlights() {
       clueEl.classList.add('active-clue');
       clueEl.scrollIntoView({block: 'nearest'});
     }
+    const mobClueEl = document.getElementById(`mob-clue-${selDir}-${wordIdx}`);
+    if (mobClueEl) mobClueEl.classList.add('active-clue');
   }
 
   // Update mobile clue bar
@@ -402,12 +556,17 @@ function applyHighlights() {
 }
 
 function updateClueBar() {
-  const bar = document.getElementById('active-clue-text');
   const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
-  if (wordIdx < 0) { bar.textContent = 'Select a cell to begin'; return; }
   const words = selDir === 'across' ? PUZZLE.across : PUZZLE.down;
-  const word = words[wordIdx];
-  bar.textContent = `${word.number}-${selDir === 'across' ? 'A' : 'D'}: ${word.clue}`;
+  const label = wordIdx >= 0
+    ? `${words[wordIdx].number}-${selDir === 'across' ? 'A' : 'D'}: ${words[wordIdx].clue}`
+    : 'Select a cell to begin';
+
+  const bar = document.getElementById('active-clue-text');
+  if (bar) bar.textContent = label;
+
+  const mobBar = document.getElementById('mob-clue-text');
+  if (mobBar) mobBar.textContent = wordIdx >= 0 ? label : 'Select a cell';
 }
 
 function currentWordCells() {
@@ -449,7 +608,7 @@ function onCellClick(r, c) {
   selDownIdx = cellDownIdx[`${r},${c}`] !== undefined ? cellDownIdx[`${r},${c}`] : -1;
 
   applyHighlights();
-  cellEls[selRow][selCol].scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
+  scrollCellIntoView();
 }
 
 function selectWord(dir, idx) {
@@ -465,7 +624,7 @@ function selectWord(dir, idx) {
   selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
   selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
   applyHighlights();
-  cellEls[selRow][selCol].scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
+  scrollCellIntoView();
   focusInput();
 }
 
@@ -474,8 +633,10 @@ function selectWord(dir, idx) {
 // ============================================================
 const inputEl = document.getElementById('xw-input');
 
+function isMobile() { return window.innerWidth < 768; }
+
 function focusInput() {
-  // Move hidden input to selected cell so iOS positions the keyboard below it
+  if (isMobile()) return; // custom keyboard handles input on mobile
   if (selRow >= 0 && selCol >= 0) {
     const rect = cellEls[selRow][selCol].getBoundingClientRect();
     inputEl.style.top  = (window.scrollY + rect.top  + rect.height / 2) + 'px';
@@ -483,6 +644,19 @@ function focusInput() {
   }
   inputEl.value = '';
   inputEl.focus();
+}
+
+function scrollCellIntoView() {
+  if (!isMobile() || selRow < 0) return;
+  const cellEl = cellEls[selRow][selCol];
+  const rect = cellEl.getBoundingClientRect();
+  const kbHeight = 180;
+  const topOffset = 56 + 48; // nav + mob clue nav
+  const visibleBottom = window.innerHeight - kbHeight;
+  if (rect.top < topOffset || rect.bottom > visibleBottom) {
+    const target = window.scrollY + rect.top - topOffset - 16;
+    window.scrollTo({top: Math.max(0, target), behavior: 'smooth'});
+  }
 }
 
 // Mobile: beforeinput fires reliably for backspace on virtual keyboards
@@ -606,6 +780,7 @@ function advanceInWord() {
     selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
     selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
     applyHighlights();
+    scrollCellIntoView();
   }
 }
 
@@ -819,6 +994,87 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ============================================================
+// Mobile keyboard
+// ============================================================
+(function buildMobileKeyboard() {
+  const ROWS = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['⌫','Z','X','C','V','B','N','M','⏎']
+  ];
+  const kb = document.getElementById('mob-kb');
+  ROWS.forEach(keys => {
+    const row = document.createElement('div');
+    row.className = 'mob-kb-row';
+    keys.forEach(k => {
+      const btn = document.createElement('button');
+      btn.textContent = k;
+      btn.className = 'mob-key' + (k === '⌫' || k === '⏎' ? ' wide' : '');
+      btn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        handleMobileKey(k);
+      }, {passive: false});
+      btn.addEventListener('click', () => handleMobileKey(k));
+      row.appendChild(btn);
+    });
+    kb.appendChild(row);
+  });
+})();
+
+function handleMobileKey(k) {
+  if (selRow < 0) return;
+  if (k === '⌫') handleBackspace();       // ⌫ backspace
+  else if (k === '⏎') cycleClue(1);       // ⏎ next word
+  else handleLetter(k);
+}
+
+// Toggle across/down when tapping the clue bar text on mobile
+function toggleSelDir() {
+  if (selRow < 0) return;
+  const hasAcross = cellAcrossIdx[`${selRow},${selCol}`] !== undefined;
+  const hasDown   = cellDownIdx[`${selRow},${selCol}`] !== undefined;
+  if (hasAcross && hasDown) {
+    selDir = selDir === 'across' ? 'down' : 'across';
+    selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
+    selDownIdx   = cellDownIdx[`${selRow},${selCol}`] !== undefined   ? cellDownIdx[`${selRow},${selCol}`]   : -1;
+    applyHighlights();
+  }
+}
+
+// ============================================================
+// Clue drawer (mobile)
+// ============================================================
+(function buildClueDrawer() {
+  function buildList(words, containerId, dir) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    words.forEach((word, idx) => {
+      const div = document.createElement('div');
+      div.className = 'clue-item';
+      div.id = `mob-clue-${dir}-${idx}`;
+      div.innerHTML = `<span class="clue-num">${word.number}.</span>${escapeHtml(word.clue)}`;
+      div.addEventListener('click', () => { selectWord(dir, idx); closeClueDrawer(); });
+      container.appendChild(div);
+    });
+  }
+  buildList(PUZZLE.across, 'mob-across-list', 'across');
+  buildList(PUZZLE.down,   'mob-down-list',   'down');
+})();
+
+function openClueDrawer() {
+  document.getElementById('clue-drawer').classList.add('open');
+  // Scroll active clue into view inside drawer
+  const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
+  if (wordIdx >= 0) {
+    const el = document.getElementById(`mob-clue-${selDir}-${wordIdx}`);
+    if (el) setTimeout(() => el.scrollIntoView({block: 'center'}), 50);
+  }
+}
+function closeClueDrawer() {
+  document.getElementById('clue-drawer').classList.remove('open');
 }
 
 // ============================================================
