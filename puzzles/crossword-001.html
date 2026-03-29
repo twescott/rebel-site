@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 47471 bytes
+File size: 49411 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -69,6 +69,7 @@ ontent="width=device-width, initial-scale=1.0">
     .xw-cell.correct .cell-letter { color: #16a34a; font-weight: 700; }
     .xw-cell.incorrect .cell-letter { color: #dc2626; font-weight: 700; }
     .xw-cell.revealed .cell-letter { color: #2563eb; }
+    .cell-letter.rebus { font-size: clamp(5px, 1.6vw, 11px); letter-spacing: -0.03em; }
 
     .xw-cell .cell-number {
       position: absolute;
@@ -202,6 +203,9 @@ ontent="width=device-width, initial-scale=1.0">
           <button onclick="clearPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
         </div>
       </div>
+
+      <!-- Rebus toggle -->
+      <button id="rebus-btn" onclick="toggleRebus()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors">Rebus</button>
 
       <!-- Autocheck toggle -->
       <button id="autocheck-btn" onclick="toggleAutocheck()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors">Autocheck: Off</button>
@@ -415,6 +419,7 @@ function currentWordCells() {
 // ============================================================
 function onCellClick(r, c) {
   if (isBlack(r, c)) return;
+  exitRebus();
   focusInput();
 
   const sameCell = r === selRow && c === selCol;
@@ -476,14 +481,20 @@ function onKeyDown(e) {
 
   if (e.key === 'Tab') {
     e.preventDefault();
+    exitRebus();
     cycleClue(e.shiftKey ? -1 : 1);
     return;
   }
 
-  if (e.key === 'ArrowRight') { e.preventDefault(); move(0, 1); return; }
-  if (e.key === 'ArrowLeft')  { e.preventDefault(); move(0, -1); return; }
-  if (e.key === 'ArrowDown')  { e.preventDefault(); move(1, 0); return; }
-  if (e.key === 'ArrowUp')    { e.preventDefault(); move(-1, 0); return; }
+  if (e.key === 'Enter' || e.key === 'Escape') {
+    if (rebusMode) { e.preventDefault(); exitRebus(); if (e.key === 'Enter') advanceInWord(); }
+    return;
+  }
+
+  if (e.key === 'ArrowRight') { e.preventDefault(); exitRebus(); move(0, 1); return; }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); exitRebus(); move(0, -1); return; }
+  if (e.key === 'ArrowDown')  { e.preventDefault(); exitRebus(); move(1, 0); return; }
+  if (e.key === 'ArrowUp')    { e.preventDefault(); exitRebus(); move(-1, 0); return; }
 
   if (e.key === 'Backspace') {
     e.preventDefault();
@@ -493,7 +504,8 @@ function onKeyDown(e) {
 
   if (e.key === 'Delete') {
     e.preventDefault();
-    setLetter('');
+    exitRebus();
+    setCellContent(selRow, selCol, '');
     return;
   }
 
@@ -520,18 +532,40 @@ function move(dr, dc) {
 }
 
 function handleLetter(letter) {
-  // Clear any check state on this cell
-  cellState[selRow][selCol] = null;
-  setLetter(letter);
-  advanceInWord();
-  checkComplete();
+  if (rebusMode) {
+    // Append to current cell content
+    const current = userGrid[selRow][selCol] || '';
+    cellState[selRow][selCol] = null;
+    setCellContent(selRow, selCol, current + letter);
+    if (autocheck) {
+      const val = userGrid[selRow][selCol];
+      cellState[selRow][selCol] = val === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+    }
+    applyHighlights();
+  } else {
+    cellState[selRow][selCol] = null;
+    setCellContent(selRow, selCol, letter);
+    if (autocheck && letter) {
+      cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+    }
+    advanceInWord();
+    checkComplete();
+  }
+}
+
+// setCellContent: single source of truth for writing to a cell
+function setCellContent(r, c, text) {
+  userGrid[r][c] = text;
+  const el = document.getElementById(`letter-${r}-${c}`);
+  if (el) {
+    el.textContent = text;
+    el.classList.toggle('rebus', text.length > 1);
+  }
 }
 
 function setLetter(letter) {
   cellState[selRow][selCol] = null;
-  userGrid[selRow][selCol] = letter;
-  const el = document.getElementById(`letter-${selRow}-${selCol}`);
-  if (el) el.textContent = letter;
+  setCellContent(selRow, selCol, letter);
   if (autocheck && letter) {
     cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
   }
@@ -550,6 +584,20 @@ function advanceInWord() {
 }
 
 function handleBackspace() {
+  if (rebusMode) {
+    const current = userGrid[selRow][selCol] || '';
+    if (current.length > 1) {
+      cellState[selRow][selCol] = null;
+      setCellContent(selRow, selCol, current.slice(0, -1));
+      applyHighlights();
+    } else {
+      cellState[selRow][selCol] = null;
+      setCellContent(selRow, selCol, '');
+      exitRebus();
+      applyHighlights();
+    }
+    return;
+  }
   if (userGrid[selRow][selCol]) {
     cellState[selRow][selCol] = null;
     setLetter('');
@@ -606,6 +654,24 @@ document.addEventListener('click', e => {
 // ============================================================
 // Autocheck
 // ============================================================
+let rebusMode = false;
+function toggleRebus() {
+  if (selRow < 0) return;
+  rebusMode = !rebusMode;
+  const btn = document.getElementById('rebus-btn');
+  btn.classList.toggle('bg-navy', rebusMode);
+  btn.classList.toggle('text-white', rebusMode);
+  btn.classList.toggle('border-navy', !rebusMode);
+  btn.classList.toggle('text-navy', !rebusMode);
+}
+function exitRebus() {
+  if (!rebusMode) return;
+  rebusMode = false;
+  const btn = document.getElementById('rebus-btn');
+  btn.classList.remove('bg-navy', 'text-white');
+  btn.classList.add('border-navy', 'text-navy');
+}
+
 let autocheck = false;
 function toggleAutocheck() {
   autocheck = !autocheck;
@@ -655,8 +721,7 @@ function revealLetter() {
   const sol = getSolution(selRow, selCol);
   userGrid[selRow][selCol] = sol;
   cellState[selRow][selCol] = 'revealed';
-  const el = document.getElementById(`letter-${selRow}-${selCol}`);
-  if (el) el.textContent = sol;
+  setCellContent(selRow, selCol, sol);
   applyHighlights();
   checkComplete();
 }
@@ -667,8 +732,7 @@ function revealWord() {
     const sol = getSolution(row, col);
     userGrid[row][col] = sol;
     cellState[row][col] = 'revealed';
-    const el = document.getElementById(`letter-${row}-${col}`);
-    if (el) el.textContent = sol;
+    setCellContent(row, col, sol);
   });
   applyHighlights();
   checkComplete();
@@ -681,8 +745,7 @@ function revealPuzzle() {
       const sol = getSolution(r, c);
       userGrid[r][c] = sol;
       cellState[r][c] = 'revealed';
-      const el = document.getElementById(`letter-${r}-${c}`);
-      if (el) el.textContent = sol;
+      setCellContent(r, c, sol);
     }
   }
   applyHighlights();
@@ -695,8 +758,7 @@ function clearWord() {
     if (cellState[row][col] === 'revealed') return;
     userGrid[row][col] = '';
     cellState[row][col] = null;
-    const el = document.getElementById(`letter-${row}-${col}`);
-    if (el) el.textContent = '';
+    setCellContent(row, col, '');
   });
   applyHighlights();
 }
@@ -707,8 +769,7 @@ function clearPuzzle() {
       if (PUZZLE.grid[r][c].black || cellState[r][c] === 'revealed') continue;
       userGrid[r][c] = '';
       cellState[r][c] = null;
-      const el = document.getElementById(`letter-${r}-${c}`);
-      if (el) el.textContent = '';
+      setCellContent(r, c, '');
     }
   }
   applyHighlights();
