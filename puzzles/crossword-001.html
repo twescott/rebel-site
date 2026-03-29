@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 42379 bytes
+File size: 47444 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -64,6 +64,8 @@ ontent="width=device-width, initial-scale=1.0">
     .xw-cell.shaded { background: #d4d4d4; }
     .xw-cell.selected { background: #93c5fd !important; }
     .xw-cell.word-highlight { background: #dbeafe !important; }
+    .xw-menu-item { display: block; width: 100%; text-align: left; padding: 0.4rem 0.75rem; font-size: 0.875rem; color: #1c1917; }
+    .xw-menu-item:hover { background: #f3f4f6; }
     .xw-cell.correct { background: #bbf7d0 !important; }
     .xw-cell.incorrect { background: #fecaca !important; }
     .xw-cell.revealed { background: #bfdbfe !important; }
@@ -170,10 +172,40 @@ ontent="width=device-width, initial-scale=1.0">
     </div>
 
     <!-- Buttons -->
-    <div class="flex flex-wrap gap-2 mb-4">
-      <button onclick="checkWord()" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors">Check Word</button>
-      <button onclick="revealWord()" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors">Reveal Word</button>
-      <button onclick="checkAll()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors">Check All</button>
+    <div class="flex flex-wrap gap-2 mb-4 items-center">
+
+      <!-- Check dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('check-menu')" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors flex items-center gap-1">Check <span class="text-xs">▾</span></button>
+        <div id="check-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="checkLetter();closeMenus()" class="xw-menu-item">Letter</button>
+          <button onclick="checkWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="checkAll();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Reveal dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('reveal-menu')" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors flex items-center gap-1">Reveal <span class="text-xs">▾</span></button>
+        <div id="reveal-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="revealLetter();closeMenus()" class="xw-menu-item">Letter</button>
+          <button onclick="revealWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="revealPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Clear dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('clear-menu')" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors flex items-center gap-1">Clear <span class="text-xs">▾</span></button>
+        <div id="clear-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="clearWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="clearPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Autocheck toggle -->
+      <button id="autocheck-btn" onclick="toggleAutocheck()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors">Autocheck: Off</button>
+
     </div>
 
     <!-- Layout: grid left, clues right -->
@@ -496,9 +528,13 @@ function handleLetter(letter) {
 }
 
 function setLetter(letter) {
+  cellState[selRow][selCol] = null;
   userGrid[selRow][selCol] = letter;
   const el = document.getElementById(`letter-${selRow}-${selCol}`);
   if (el) el.textContent = letter;
+  if (autocheck && letter) {
+    cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+  }
 }
 
 function advanceInWord() {
@@ -552,8 +588,47 @@ function cycleClue(dir) {
 }
 
 // ============================================================
-// Check / Reveal
 // ============================================================
+// Dropdown menus
+// ============================================================
+function toggleMenu(id) {
+  const menus = document.querySelectorAll('.xw-menu');
+  menus.forEach(m => { if (m.id !== id) m.classList.add('hidden'); });
+  document.getElementById(id).classList.toggle('hidden');
+}
+function closeMenus() {
+  document.querySelectorAll('.xw-menu').forEach(m => m.classList.add('hidden'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.relative')) closeMenus();
+});
+
+// ============================================================
+// Autocheck
+// ============================================================
+let autocheck = false;
+function toggleAutocheck() {
+  autocheck = !autocheck;
+  const btn = document.getElementById('autocheck-btn');
+  btn.textContent = 'Autocheck: ' + (autocheck ? 'On' : 'Off');
+  btn.classList.toggle('bg-navy', autocheck);
+  btn.classList.toggle('text-white', autocheck);
+  btn.classList.toggle('border-navy', !autocheck);
+  btn.classList.toggle('text-navy', !autocheck);
+  if (autocheck) checkAll();
+}
+
+// ============================================================
+// Check / Reveal / Clear
+// ============================================================
+function checkLetter() {
+  if (selRow < 0) return;
+  if (userGrid[selRow][selCol]) {
+    cellState[selRow][selCol] = userGrid[selRow][selCol] === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+  }
+  applyHighlights();
+}
+
 function checkWord() {
   const cells = currentWordCells();
   cells.forEach(({row, col}) => {
@@ -562,6 +637,28 @@ function checkWord() {
     }
   });
   applyHighlights();
+}
+
+function checkAll() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (!PUZZLE.grid[r][c].black && userGrid[r][c]) {
+        cellState[r][c] = userGrid[r][c] === getSolution(r, c) ? 'correct' : 'incorrect';
+      }
+    }
+  }
+  applyHighlights();
+}
+
+function revealLetter() {
+  if (selRow < 0) return;
+  const sol = getSolution(selRow, selCol);
+  userGrid[selRow][selCol] = sol;
+  cellState[selRow][selCol] = 'revealed';
+  const el = document.getElementById(`letter-${selRow}-${selCol}`);
+  if (el) el.textContent = sol;
+  applyHighlights();
+  checkComplete();
 }
 
 function revealWord() {
@@ -577,12 +674,41 @@ function revealWord() {
   checkComplete();
 }
 
-function checkAll() {
+function revealPuzzle() {
   for (let r = 0; r < H; r++) {
     for (let c = 0; c < W; c++) {
-      if (!PUZZLE.grid[r][c].black && userGrid[r][c]) {
-        cellState[r][c] = userGrid[r][c] === getSolution(r, c) ? 'correct' : 'incorrect';
-      }
+      if (PUZZLE.grid[r][c].black) continue;
+      const sol = getSolution(r, c);
+      userGrid[r][c] = sol;
+      cellState[r][c] = 'revealed';
+      const el = document.getElementById(`letter-${r}-${c}`);
+      if (el) el.textContent = sol;
+    }
+  }
+  applyHighlights();
+  checkComplete();
+}
+
+function clearWord() {
+  const cells = currentWordCells();
+  cells.forEach(({row, col}) => {
+    if (cellState[row][col] === 'revealed') return;
+    userGrid[row][col] = '';
+    cellState[row][col] = null;
+    const el = document.getElementById(`letter-${row}-${col}`);
+    if (el) el.textContent = '';
+  });
+  applyHighlights();
+}
+
+function clearPuzzle() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (PUZZLE.grid[r][c].black || cellState[r][c] === 'revealed') continue;
+      userGrid[r][c] = '';
+      cellState[r][c] = null;
+      const el = document.getElementById(`letter-${r}-${c}`);
+      if (el) el.textContent = '';
     }
   }
   applyHighlights();
