@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 49528 bytes
+File size: 49665 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -67,6 +67,7 @@ ontent="width=device-width, initial-scale=1.0">
     .xw-menu-item { display: block; width: 100%; text-align: left; padding: 0.4rem 0.75rem; font-size: 0.875rem; color: #1c1917; }
     .xw-menu-item:hover { background: #f3f4f6; }
     #autocheck-btn[data-on="1"]:hover { background: #162d4a; }
+    #rebus-btn[data-on="1"]:hover { background: #162d4a; }
     .xw-cell.correct .cell-letter { color: #16a34a; font-weight: 700; }
     .xw-cell.incorrect .cell-letter { color: #dc2626; font-weight: 700; }
     .xw-cell.revealed .cell-letter { color: #2563eb; }
@@ -206,7 +207,7 @@ ontent="width=device-width, initial-scale=1.0">
       </div>
 
       <!-- Rebus toggle -->
-      <button id="rebus-btn" onclick="toggleRebus()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors">Rebus</button>
+      <button id="rebus-btn" onclick="toggleRebus()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors" data-on="0">Rebus</button>
 
       <!-- Autocheck toggle -->
       <button id="autocheck-btn" onclick="toggleAutocheck()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors" data-on="0">Autocheck: Off</button>
@@ -664,6 +665,7 @@ function toggleRebus() {
   btn.classList.toggle('text-white', rebusMode);
   btn.classList.toggle('border-navy', !rebusMode);
   btn.classList.toggle('text-navy', !rebusMode);
+  btn.dataset.on = rebusMode ? '1' : '0';
 }
 function exitRebus() {
   if (!rebusMode) return;
@@ -671,6 +673,7 @@ function exitRebus() {
   const btn = document.getElementById('rebus-btn');
   btn.classList.remove('bg-navy', 'text-white');
   btn.classList.add('border-navy', 'text-navy');
+  btn.dataset.on = '0';
 }
 
 let autocheck = false;
