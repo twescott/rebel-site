@@ -122,8 +122,21 @@ Include this in every puzzle page footer:
 ## Crossword source files
 Puzzles are authored in CrosswordCompiler (.ccw files on OneDrive).
 - The internal puzzle title (inside the .ccw) is the canonical title — never assume the filename matches.
-- Export to .puz (Across Lite) format to parse the grid and clues programmatically.
-- Use the existing `read_puz.js` parser at `C:/Users/tiwescot/PersonalAI/read_puz.js`.
+- **Export as `.ipuz`** (not .puz). iPuz preserves cell shading; .puz does not. Remind the user if they offer a .puz or other format.
+- Use the existing `parse-ipuz.js` parser at `C:/Users/tiwescot/PersonalAI/parse-ipuz.js`.
+- Generate the HTML with `generate-crossword.js` at `C:/Users/tiwescot/PersonalAI/generate-crossword.js`.
+  - Pipe: `node parse-ipuz.js <path>.ipuz > puz-output.json && node generate-crossword.js > puzzles/<filename>.html`
+
+## Crossword page design
+These are the locked-in formatting decisions for all crossword puzzle pages:
+- **Header:** puzzle title + "By [author]" only — no puzzle number, no theme
+- **Page title tag:** `<title>[Puzzle Title] — Rebel the Dog</title>`
+- **Black cells:** `#000000` (pure black, not navy)
+- **Shaded cells:** `#d4d4d4` (gray, for theme highlights from iPuz `color:C0C0C0` cells)
+- **Clues:** no word-length suffixes (strip trailing `(N)` from clue text)
+- **Cell size:** `clamp(20px, 5.5vw, 40px)` on all screens
+- **Layout:** grid left (~60%) + scrollable clue panels right (~40%) on desktop; stacked on mobile
+- **Nav:** same as all site pages — "About" hidden on mobile (it's in the footer)
 
 ## Notes
 - NEVER invent puzzle names, clue text, themes, or difficulty ratings — always ask the user.
