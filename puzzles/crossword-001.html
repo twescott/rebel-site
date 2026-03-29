@@ -1,5 +1,5 @@
 Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 59272 bytes
+File size: 59359 bytes
 ontent="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
   <title>In the Beginning... — Rebel the Dog</title>
@@ -683,8 +683,15 @@ function onKeyDown(e) {
     return;
   }
 
-  if (e.key === 'Enter' || e.key === 'Escape') {
-    if (rebusMode) { e.preventDefault(); exitRebus(); if (e.key === 'Enter') advanceInWord(); }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (rebusMode) { exitRebus(); advanceInWord(); }
+    else { cycleClue(1); }
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    if (rebusMode) { e.preventDefault(); exitRebus(); }
     return;
   }
 
