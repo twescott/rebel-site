@@ -46,7 +46,7 @@
     .row.shake { animation: shake .4s ease; }
 
     .key {
-      height: 58px; min-width: 43px; padding: 0 6px;
+      height: 58px; flex: 1; padding: 0 4px;
       border: none; border-radius: 6px;
       background: #d1d5db; color: #1f2937;
       font-size: .8rem; font-weight: 700; text-transform: uppercase;
@@ -57,7 +57,7 @@
     .key.correct{ background: #538d4e; color: #fff; }
     .key.present{ background: #c47f17; color: #fff; }
     .key.absent { background: #6c6c6c; color: #fff; }
-    .key.wide   { min-width: 65px; font-size: .72rem; }
+    .key.wide   { flex: 1.5; font-size: .72rem; }
 
     #toast {
       position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
@@ -152,7 +152,7 @@
       const kb = document.getElementById('keyboard');
       ROWS.forEach(keys => {
         const rowEl = document.createElement('div');
-        rowEl.className = 'flex gap-1.5';
+        rowEl.className = 'flex gap-1.5 w-full';
         keys.forEach(k => {
           const btn = document.createElement('button');
           btn.textContent = k;
