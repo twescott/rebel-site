@@ -1,0 +1,26 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# Replace YOUR_NETLIFY_SITE with your actual Netlify subdomain (e.g. amazing-pup-abc123)
+site_url: https://YOUR_NETLIFY_SITE.netlify.app
+display_url: https://rebel-the-dog.com
+
+media_folder: images/posts
+public_folder: images/posts
+
+collections:
+  - name: posts
+    label: Posts
+    folder: posts
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: Title,          name: title,   widget: string }
+      - { label: Date,           name: date,    widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { label: Author,         name: author,  widget: string,   default: "Rebel's Dad" }
+      - { label: Excerpt,        name: excerpt, widget: text,     required: false, hint: "Short description shown in the post list" }
+      - { label: Featured Image, name: image,   widget: image,    required: false }
+      - { label: Body,           name: body,    widget: markdown }

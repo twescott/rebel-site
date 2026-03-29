@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="https://rebel-the-dog.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post — Rebel the Dog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+          },
+          typography: {
+            DEFAULT: {
+              css: {
+                color: '#292524',
+                a: { color: '#1e3a5f' },
+                h2: { fontFamily: '"Playfair Display", Georgia, serif', color: '#1e3a5f' },
+                h3: { fontFamily: '"Playfair Display", Georgia, serif', color: '#1e3a5f' },
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .post-body h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: #1e3a5f; margin: 2rem 0 0.75rem; }
+    .post-body h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 700; color: #1e3a5f; margin: 1.5rem 0 0.5rem; }
+    .post-body p  { margin-bottom: 1.25rem; line-height: 1.75; color: #292524; }
+    .post-body a  { color: #1e3a5f; text-decoration: underline; }
+    .post-body ul, .post-body ol { margin: 0 0 1.25rem 1.5rem; line-height: 1.75; color: #292524; }
+    .post-body ul { list-style: disc; }
+    .post-body ol { list-style: decimal; }
+    .post-body li { margin-bottom: 0.25rem; }
+    .post-body blockquote { border-left: 4px solid #93c5fd; padding-left: 1rem; margin: 1.5rem 0; color: #57534e; font-style: italic; }
+    .post-body img { max-width: 100%; border-radius: 8px; margin: 1.5rem 0; }
+    .post-body hr { border: none; border-top: 1px solid #e7e5e4; margin: 2rem 0; }
+    .post-body pre { background: #f5f5f4; border-radius: 6px; padding: 1rem; overflow-x: auto; margin-bottom: 1.25rem; }
+    .post-body code { font-size: 0.875em; background: #f5f5f4; padding: 0.15em 0.35em; border-radius: 3px; }
+    .post-body pre code { background: none; padding: 0; }
+  </style>
+  <link rel="alternate" type="application/rss+xml" title="Rebel the Dog" href="feed.xml">
+</head>
+<body class="bg-sky-50 text-stone-900 font-sans antialiased">
+
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel the Dog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+        <a href="" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Posts</a>
+        <a href="puzzles.html" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Puzzles</a>
+        <a href="about.html" class="hidden sm:block px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-5 py-12">
+    <div id="post-content">
+      <p class="text-stone-400 italic">Loading...</p>
+    </div>
+  </main>
+
+  <footer class="bg-[#1e3a5f] mt-20">
+    <div class="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel the Dog</span>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
+        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const slug = new URLSearchParams(location.search).get('p');
+
+    if (!slug) {
+      document.getElementById('post-content').innerHTML =
+        '<p class="text-stone-500 italic">No post specified.</p>';
+    } else {
+      fetch('posts/' + slug + '.md')
+        .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .then(text => {
+          const fm = {};
+          let body = text;
+          const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+          if (m) {
+            m[1].split(/\r?\n/).forEach(line => {
+              const i = line.indexOf(': ');
+              if (i > -1) {
+                const key = line.slice(0, i).trim();
+                const val = line.slice(i + 2).trim().replace(/^"(.*)"$/, '$1');
+                fm[key] = val;
+              }
+            });
+            body = m[2];
+          }
+
+          const title  = fm.title  || 'Untitled';
+          const author = fm.author || '';
+          const date   = fm.date
+            ? new Date(fm.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : '';
+
+          document.title = title + ' \u2014 Rebel the Dog';
+
+          const imgHtml = fm.image
+            ? `<img src="${esc(fm.image)}" alt="" class="w-full rounded-xl mb-8 object-cover max-h-80">`
+            : '';
+
+          const meta = [date, author ? 'By ' + esc(author) : ''].filter(Boolean).join(' &middot; ');
+
+          document.getElementById('post-content').innerHTML =
+            `<article>
+              <header class="mb-8">
+                <h1 class="font-serif text-4xl sm:text-5xl font-bold text-[#1e3a5f] leading-tight mb-3">${esc(title)}</h1>
+                ${meta ? `<p class="text-stone-500 text-sm">${meta}</p>` : ''}
+              </header>
+              ${imgHtml}
+              <div class="post-body text-base">${marked.parse(body)}</div>
+            </article>
+            <div class="mt-12 pt-6 border-t border-stone-200">
+              <a href="posts/" class="text-[#1e3a5f] hover:underline text-sm font-medium">&larr; All Posts</a>
+            </div>`;
+        })
+        .catch(() => {
+          document.getElementById('post-content').innerHTML =
+            '<p class="text-stone-500 italic">Post not found.</p>';
+        });
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>

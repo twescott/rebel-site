@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <base href="https://twescott.github.io/rebel-site/">
+  <base href="https://rebel-the-dog.com/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Posts &mdash; Rebel the Dog</title>
@@ -16,9 +16,6 @@
           fontFamily: {
             serif: ['"Playfair Display"', 'Georgia', 'serif'],
             sans:  ['Inter', 'system-ui', 'sans-serif'],
-          },
-          colors: {
-            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e', light: '#fef2f2' }
           }
         }
       }
@@ -52,8 +49,8 @@
   </div>
 
   <main class="max-w-3xl mx-auto px-5 py-12">
-    <div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-10 text-center text-sky-200 font-sans text-sm italic">
-      No posts yet &mdash; check back soon!
+    <div id="posts-list">
+      <p class="text-stone-400 italic text-sm">Loading...</p>
     </div>
   </main>
 
@@ -66,5 +63,39 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    fetch('_data/posts.json')
+      .then(r => r.ok ? r.json() : [])
+      .then(posts => {
+        const el = document.getElementById('posts-list');
+        if (!posts.length) {
+          el.innerHTML = '<div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-10 text-center text-sky-400 font-sans text-sm italic">No posts yet &mdash; check back soon!</div>';
+          return;
+        }
+        el.innerHTML = posts.map(post => {
+          const date = post.date
+            ? new Date(post.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : '';
+          const meta = [date, post.author ? 'By ' + esc(post.author) : ''].filter(Boolean).join(' &middot; ');
+          return `
+            <article class="border-b border-stone-200 py-6 last:border-0">
+              <a href="posts/post.html?p=${esc(post.slug)}" class="group block mb-1">
+                <h2 class="font-serif text-2xl font-bold text-[#1e3a5f] group-hover:underline leading-snug">${esc(post.title)}</h2>
+              </a>
+              ${meta ? `<p class="text-stone-500 text-sm mb-2">${meta}</p>` : ''}
+              ${post.excerpt ? `<p class="text-stone-600 text-sm leading-relaxed">${esc(post.excerpt)}</p>` : ''}
+            </article>`;
+        }).join('');
+      })
+      .catch(() => {
+        document.getElementById('posts-list').innerHTML =
+          '<div class="rounded-xl border-2 border-dashed border-sky-200 bg-sky-100 p-10 text-center text-sky-400 font-sans text-sm italic">No posts yet &mdash; check back soon!</div>';
+      });
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
 </body>
 </html>
