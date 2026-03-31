@@ -4,7 +4,7 @@
   <base href="https://rebel-the-dog.com/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Post — Rebel the Dog</title>
+  <title>Post — Rebel's Blog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -48,13 +48,13 @@
     .post-body code { font-size: 0.875em; background: #f5f5f4; padding: 0.15em 0.35em; border-radius: 3px; }
     .post-body pre code { background: none; padding: 0; }
   </style>
-  <link rel="alternate" type="application/rss+xml" title="Rebel the Dog" href="feed.xml">
+  <link rel="alternate" type="application/rss+xml" title="Rebel's Blog" href="feed.xml">
 </head>
 <body class="bg-sky-50 text-stone-900 font-sans antialiased">
 
   <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
     <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
-      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel the Dog</a>
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
       <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
         <a href="" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
         <a href="posts/" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Posts</a>
@@ -75,7 +75,7 @@
 
   <footer class="bg-[#1e3a5f] mt-20">
     <div class="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel the Dog</span>
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
       <div class="flex items-center gap-4 text-sm">
         <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
         <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
@@ -114,7 +114,7 @@
             ? new Date(fm.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             : '';
 
-          document.title = title + ' \u2014 Rebel the Dog';
+          document.title = title + ' \u2014 Rebel's Blog';
 
           const imgHtml = fm.image
             ? `<img src="${esc(fm.image)}" alt="" class="w-full rounded-xl mb-8 object-cover max-h-80">`
