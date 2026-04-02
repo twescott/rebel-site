@@ -17,19 +17,17 @@
             serif: ['"Playfair Display"', 'Georgia', 'serif'],
             sans:  ['Inter', 'system-ui', 'sans-serif'],
           },
-          colors: {
-            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e' }
-          }
+          colors: { brand: { DEFAULT: '#9b2226', dark: '#7a1a1e' } }
         }
       }
     }
   </script>
   <style>
-    /* ── Full-height game layout (Wordle-style) ──────────── */
+    /* ── Full-height Wordle-style layout ─────────────────── */
     html, body { height: 100%; }
     body {
-      height: 100vh;        /* fallback */
-      height: 100svh;       /* accounts for mobile browser chrome */
+      height: 100vh;
+      height: 100svh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -42,12 +40,13 @@
       flex-direction: column;
     }
 
+    /* No align-items:center here — that causes keyboard to shrink to content width.
+       Grid centering is handled by #grid's own align-items. */
     .game {
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       width: 100%;
       max-width: 500px;
       margin: 0 auto;
@@ -66,23 +65,15 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: center;   /* centers tile rows horizontally */
       justify-content: center;
       gap: 5px;
     }
 
     .tile-row { display: flex; gap: 5px; }
 
-    /* Tile size: constrained by both available height and width */
-    :root {
-      /* overhead = nav(56) + header(~65) + keyboard(~198) + row-gaps(25) + buffer(15) = 359 */
-      --tile-h: calc((100svh - 359px) / 6);
-      --tile-w: calc((min(100vw, 524px) - 44px) / 5);
-      --tile-size: clamp(36px, min(var(--tile-h), var(--tile-w)), 62px);
-    }
-    @supports not (height: 1svh) {
-      :root { --tile-h: calc((100vh - 359px) / 6); }
-    }
+    /* tile-size set by JS after measuring actual DOM heights */
+    :root { --tile-size: 44px; }
 
     /* ── Animations ──────────────────────────────────────── */
     @keyframes pop      { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
@@ -110,7 +101,8 @@
     /* ── Keyboard ────────────────────────────────────────── */
     #keyboard {
       flex-shrink: 0;
-      width: 100%;
+      /* Stretch to full game width — do NOT rely on align-items from parent */
+      align-self: stretch;
       padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
     }
 
@@ -118,6 +110,8 @@
       display: flex;
       gap: 5px;
       margin-bottom: 5px;
+      /* Block flex containers fill parent width by default, but be explicit */
+      width: 100%;
     }
     .kb-row:last-child { margin-bottom: 0; }
 
@@ -160,7 +154,7 @@
 </head>
 <body class="bg-sky-50 text-stone-900 font-sans antialiased">
 
-  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg" style="flex-shrink:0">
+  <nav class="bg-[#1e3a5f] shadow-lg" style="flex-shrink:0">
     <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
       <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
       <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
@@ -205,6 +199,26 @@
     let gameOver = false;
     const guesses  = [];
     const keyState = {};
+
+    // ── Tile sizing: measure actual DOM heights, no hardcoded guesses ─────
+    function calcTileSize() {
+      const vpH    = window.innerHeight;
+      const navH   = document.querySelector('nav').offsetHeight;
+      const hdrH   = document.querySelector('.game-header').offsetHeight;
+      const kbH    = document.getElementById('keyboard').offsetHeight;
+      const rowGaps = (MAX_GUESSES - 1) * 5;
+      const colGaps = (WORD_LEN - 1) * 5;
+
+      const availH = vpH - navH - hdrH - kbH - rowGaps;
+      const tileH  = availH / MAX_GUESSES;
+
+      // game padding is 12px each side = 24px total
+      const gameW  = document.querySelector('.game').offsetWidth - 24;
+      const tileW  = (gameW - colGaps) / WORD_LEN;
+
+      const size = Math.max(20, Math.min(Math.floor(tileH), Math.floor(tileW), 62));
+      document.documentElement.style.setProperty('--tile-size', size + 'px');
+    }
 
     // ── Build grid ────────────────────────────────────────────────────────
     function buildGrid() {
@@ -290,23 +304,22 @@
     }
 
     // ── Submit ────────────────────────────────────────────────────────────
+    function shake(row) {
+      const el = document.getElementById('row-' + row);
+      el.classList.remove('shake');
+      void el.offsetWidth;
+      el.classList.add('shake');
+    }
+
     function submitGuess() {
-      if (currentCol < WORD_LEN) {
-        shake(currentRow);
-        showToast('Not enough letters');
-        return;
-      }
+      if (currentCol < WORD_LEN) { shake(currentRow); showToast('Not enough letters'); return; }
 
       const guess = currentGuess.join('');
-
       if (validWords && !validWords.has(guess) && guess !== ANSWER) {
-        shake(currentRow);
-        showToast('Not a word');
-        return;
+        shake(currentRow); showToast('Not a word'); return;
       }
 
       const result = evaluate(guess);
-
       result.forEach((state, i) => {
         const t = getTile(currentRow, i);
         setTimeout(() => {
@@ -344,13 +357,6 @@
       }, WORD_LEN * 80 + 300);
     }
 
-    function shake(row) {
-      const el = document.getElementById('row-' + row);
-      el.classList.remove('shake');
-      void el.offsetWidth;
-      el.classList.add('shake');
-    }
-
     function updateKeyboard() {
       document.querySelectorAll('[data-key]').forEach(btn => {
         const s = keyState[btn.dataset.key];
@@ -373,8 +379,12 @@
       handleKey(e.key);
     });
 
+    // ── Init ──────────────────────────────────────────────────────────────
     buildGrid();
     buildKeyboard();
+    calcTileSize();                          // size tiles from actual layout
+    document.fonts.ready.then(calcTileSize); // recalc after web fonts load
+    window.addEventListener('resize', calcTileSize);
   </script>
 </body>
 </html>
