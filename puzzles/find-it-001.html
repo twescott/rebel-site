@@ -18,24 +18,86 @@
             sans:  ['Inter', 'system-ui', 'sans-serif'],
           },
           colors: {
-            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e', light: '#fef2f2' }
+            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e' }
           }
         }
       }
     }
   </script>
   <style>
-    @keyframes pop      { 0%,100%{transform:scale(1)}  50%{transform:scale(1.12)} }
+    /* ── Full-height game layout (Wordle-style) ──────────── */
+    html, body { height: 100%; }
+    body {
+      height: 100vh;        /* fallback */
+      height: 100svh;       /* accounts for mobile browser chrome */
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+
+    .game-header {
+      flex-shrink: 0;
+      text-align: center;
+      padding: 10px 0 4px;
+    }
+
+    #grid {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .tile-row { display: flex; gap: 5px; }
+
+    /* Tile size: constrained by both available height and width */
+    :root {
+      /* overhead = nav(56) + header(~65) + keyboard(~198) + row-gaps(25) + buffer(15) = 359 */
+      --tile-h: calc((100svh - 359px) / 6);
+      --tile-w: calc((min(100vw, 524px) - 44px) / 5);
+      --tile-size: clamp(36px, min(var(--tile-h), var(--tile-w)), 62px);
+    }
+    @supports not (height: 1svh) {
+      :root { --tile-h: calc((100vh - 359px) / 6); }
+    }
+
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes pop      { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
     @keyframes shake    { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
     @keyframes flip-out { from{transform:rotateX(0)}   to{transform:rotateX(-90deg)} }
     @keyframes flip-in  { from{transform:rotateX(90deg)} to{transform:rotateX(0)} }
 
+    /* ── Tiles ───────────────────────────────────────────── */
     .tile {
-      width: clamp(44px, calc((100vw - 56px) / 5), 62px);
-      height: clamp(44px, calc((100vw - 56px) / 5), 62px);
+      width: var(--tile-size);
+      height: var(--tile-size);
       border: 2px solid #d1d5db;
       display: flex; align-items: center; justify-content: center;
-      font-size: clamp(1.3rem, 8.5vw, 2rem); font-weight: 700; text-transform: uppercase;
+      font-size: clamp(1rem, calc(var(--tile-size) * 0.55), 2rem);
+      font-weight: 700; text-transform: uppercase;
       font-family: inherit; box-sizing: border-box;
       transition: border-color .1s;
     }
@@ -43,16 +105,41 @@
     .tile.correct { background: #538d4e; border-color: #538d4e; color: #fff; }
     .tile.present { background: #c47f17; border-color: #c47f17; color: #fff; }
     .tile.absent  { background: #6c6c6c; border-color: #6c6c6c; color: #fff; }
+    .tile-row.shake { animation: shake .4s ease; }
 
-    .row.shake { animation: shake .4s ease; }
+    /* ── Keyboard ────────────────────────────────────────── */
+    #keyboard {
+      flex-shrink: 0;
+      width: 100%;
+      padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
+    }
+
+    .kb-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .kb-row:last-child { margin-bottom: 0; }
 
     .key {
-      height: 58px; flex: 1; padding: 0 4px;
-      border: none; border-radius: 6px;
-      background: #d1d5db; color: #1f2937;
-      font-size: .8rem; font-weight: 700; text-transform: uppercase;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      user-select: none; transition: background .2s, color .2s; font-family: inherit;
+      flex: 1;
+      min-width: 0;
+      height: 58px;
+      padding: 0 4px;
+      border: none;
+      border-radius: 6px;
+      background: #d1d5db;
+      color: #1f2937;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: background .2s, color .2s;
+      font-family: inherit;
     }
     .key:hover  { background: #9ca3af; }
     .key.correct{ background: #538d4e; color: #fff; }
@@ -60,6 +147,7 @@
     .key.absent { background: #6c6c6c; color: #fff; }
     .key.wide   { flex: 1.5; font-size: .72rem; }
 
+    /* ── Toast ───────────────────────────────────────────── */
     #toast {
       position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
       background: #1f2937; color: #fff; padding: 10px 20px;
@@ -68,13 +156,11 @@
       white-space: nowrap;
     }
     #toast.show { opacity: 1; }
-
-    #keyboard { width: 100%; }
   </style>
 </head>
 <body class="bg-sky-50 text-stone-900 font-sans antialiased">
 
-  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg" style="flex-shrink:0">
     <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
       <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
       <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
@@ -90,27 +176,19 @@
   </nav>
 
   <main>
-    <div class="max-w-lg mx-auto px-4 py-10 text-center">
-      <h1 class="font-serif text-4xl font-bold mb-1">Find It!</h1>
-      <p class="text-stone-500 text-sm mb-8">Guess the 5-letter word &mdash; 6 tries</p>
+    <div class="game">
+      <div class="game-header">
+        <h1 class="font-serif text-2xl md:text-4xl font-bold mb-0.5">Find It!</h1>
+        <p class="text-stone-500 text-xs md:text-sm">Guess the 5-letter word &mdash; 6 tries</p>
+      </div>
 
-      <div id="grid" class="flex flex-col gap-1.5 items-center mb-8"></div>
-      <div id="keyboard" class="flex flex-col gap-1.5"></div>
+      <div id="grid"></div>
 
+      <div id="keyboard"></div>
     </div>
   </main>
 
   <div id="toast"></div>
-
-  <footer class="bg-[#1e3a5f] mt-16">
-    <div class="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
-      <div class="flex items-center gap-4 text-sm">
-        <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
-        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
-      </div>
-    </div>
-  </footer>
 
   <script>
     const ANSWER      = atob('RFJFQU0='); // DREAM
@@ -133,7 +211,7 @@
       const grid = document.getElementById('grid');
       for (let r = 0; r < MAX_GUESSES; r++) {
         const row = document.createElement('div');
-        row.className = 'row flex gap-1.5';
+        row.className = 'tile-row';
         row.id = 'row-' + r;
         for (let c = 0; c < WORD_LEN; c++) {
           const t = document.createElement('div');
@@ -155,7 +233,7 @@
       const kb = document.getElementById('keyboard');
       ROWS.forEach(keys => {
         const rowEl = document.createElement('div');
-        rowEl.className = 'flex gap-1.5 w-full';
+        rowEl.className = 'kb-row';
         keys.forEach(k => {
           const btn = document.createElement('button');
           btn.textContent = k;
@@ -200,11 +278,9 @@
     function evaluate(guess) {
       const result = Array(WORD_LEN).fill('absent');
       const ans    = ANSWER.split('');
-      // Pass 1: correct positions
       guess.split('').forEach((ch, i) => {
         if (ch === ans[i]) { result[i] = 'correct'; ans[i] = null; }
       });
-      // Pass 2: present elsewhere
       guess.split('').forEach((ch, i) => {
         if (result[i] === 'correct') return;
         const idx = ans.indexOf(ch);
@@ -216,26 +292,21 @@
     // ── Submit ────────────────────────────────────────────────────────────
     function submitGuess() {
       if (currentCol < WORD_LEN) {
-        document.getElementById('row-' + currentRow).classList.remove('shake');
-        void document.getElementById('row-' + currentRow).offsetWidth;
-        document.getElementById('row-' + currentRow).classList.add('shake');
+        shake(currentRow);
         showToast('Not enough letters');
         return;
       }
 
-      const guess  = currentGuess.join('');
+      const guess = currentGuess.join('');
 
       if (validWords && !validWords.has(guess) && guess !== ANSWER) {
-        document.getElementById('row-' + currentRow).classList.remove('shake');
-        void document.getElementById('row-' + currentRow).offsetWidth;
-        document.getElementById('row-' + currentRow).classList.add('shake');
+        shake(currentRow);
         showToast('Not a word');
         return;
       }
 
       const result = evaluate(guess);
 
-      // Flip tiles with staggered delay
       result.forEach((state, i) => {
         const t = getTile(currentRow, i);
         setTimeout(() => {
@@ -249,7 +320,6 @@
       });
 
       setTimeout(() => {
-        // Update key colour states (priority: correct > present > absent)
         const pri = { correct: 3, present: 2, absent: 1 };
         result.forEach((state, i) => {
           const ch = guess[i];
@@ -272,6 +342,13 @@
           showToast(ANSWER, 4000);
         }
       }, WORD_LEN * 80 + 300);
+    }
+
+    function shake(row) {
+      const el = document.getElementById('row-' + row);
+      el.classList.remove('shake');
+      void el.offsetWidth;
+      el.classList.add('shake');
     }
 
     function updateKeyboard() {
