@@ -31,10 +31,11 @@
     @keyframes flip-in  { from{transform:rotateX(90deg)} to{transform:rotateX(0)} }
 
     .tile {
-      width: 62px; height: 62px;
+      width: clamp(44px, calc((100vw - 56px) / 5), 62px);
+      height: clamp(44px, calc((100vw - 56px) / 5), 62px);
       border: 2px solid #d1d5db;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: 700; text-transform: uppercase;
+      font-size: clamp(1.3rem, 8.5vw, 2rem); font-weight: 700; text-transform: uppercase;
       font-family: inherit; box-sizing: border-box;
       transition: border-color .1s;
     }
@@ -67,6 +68,8 @@
       white-space: nowrap;
     }
     #toast.show { opacity: 1; }
+
+    #keyboard { width: 100%; }
   </style>
 </head>
 <body class="bg-sky-50 text-stone-900 font-sans antialiased">
@@ -92,7 +95,7 @@
       <p class="text-stone-500 text-sm mb-8">Guess the 5-letter word &mdash; 6 tries</p>
 
       <div id="grid" class="flex flex-col gap-1.5 items-center mb-8"></div>
-      <div id="keyboard" class="flex flex-col gap-1.5 items-center"></div>
+      <div id="keyboard" class="flex flex-col gap-1.5"></div>
 
     </div>
   </main>
