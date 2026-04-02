@@ -1,8 +1,10 @@
-Written to C:/users/tiwescot/rebel-site/puzzles/crossword-001.html
-File size: 59617 bytes
-ontent="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="https://rebel-the-dog.com/">
-  <title>In the Beginning... — Rebel's Blog</title>
+  <title>In the Beginning... &bull; Rebel's Blog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -136,19 +138,26 @@ ontent="width=device-width, initial-scale=1.0">
     }
     .toast.show { opacity: 1; }
 
-    /* ── Mobile layout (< 768px) ───────────────────────────── */
+    /* ── Mobile: full-viewport NYT-style layout ─────────────── */
     @media (max-width: 767px) {
-      #active-clue-bar  { display: none !important; }
-      #clue-panels      { display: none !important; }
-      #mob-clue-nav     { display: flex; }
-      #mob-kb           { display: flex; }
-      main              { padding-bottom: 180px; }
-      .toast            { bottom: 200px; }
-      :root             { --cell-size: clamp(20px, calc((100vw - 32px) / 15), 40px); }
+      body { height: 100svh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+      header { display: none !important; }
+      footer { display: none !important; }
+      main { flex: 1; min-height: 0; display: flex; flex-direction: column; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+      #active-clue-bar { display: none !important; }
+      #toolbar-bar     { display: none !important; }
+      #clue-panels     { display: none !important; }
+      #mob-clue-nav    { position: static; flex-shrink: 0; display: flex; margin: 0; }
+      #grid-layout     { flex: 1; min-height: 0; }
+      #grid-viewport   { width: 100%; height: 100%; overflow: hidden; position: relative; background: #fff; touch-action: none; }
+      .xw-grid { position: absolute; top: 0; left: 0; transform-origin: 0 0; transition: transform 0.2s ease; }
+      :root { --cell-size: 40px; --cell-font: 20px; --num-font: 9px; }
+      #mob-kb { position: static !important; display: flex; }
     }
     @media (min-width: 768px) {
-      #mob-clue-nav { display: none; }
-      #mob-kb       { display: none; }
+      #mob-clue-nav      { display: none; }
+      #mob-kb            { display: none; }
+      #mob-toolbar-strip { display: none; }
     }
 
     /* Mobile clue nav */
@@ -259,22 +268,48 @@ ontent="width=device-width, initial-scale=1.0">
       padding: 0 16px 24px;
     }
     #clue-drawer-sheet .clue-item { font-size: 0.8rem; }
+
+    /* Mobile toolbar strip */
+    #mob-toolbar-strip {
+      display: flex;
+      gap: 4px;
+      padding: 4px 8px;
+      background: #e5e7eb;
+      border-bottom: 1px solid #9ca3af;
+      flex-shrink: 0;
+    }
+    .mob-tool-btn {
+      flex: 1;
+      height: 32px;
+      background: #fff;
+      border: 1px solid #9ca3af;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mob-tool-btn:active { background: #dbeafe; }
+    .mob-tool-btn.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
   <!-- Navigation -->
-  <nav class="bg-navy text-white shadow-md">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/" class="font-serif text-xl font-bold tracking-wide hover:text-blue-200 transition-colors">Rebel's Blog</a>
-      <div class="flex items-center gap-6 text-sm font-medium">
-        <a href="/" class="hover:text-blue-200 transition-colors">Home</a>
-        <a href="/posts" class="hover:text-blue-200 transition-colors">Posts</a>
-        <a href="/puzzles" class="hover:text-blue-200 transition-colors">Puzzles</a>
-        <a href="/feed" title="RSS Feed" class="hover:text-blue-200 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
-          </svg>
+  <nav class="bg-[#1e3a5f] shadow-lg" style="flex-shrink:0">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+        <a href="" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="hidden sm:block px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
         </a>
       </div>
     </div>
@@ -303,7 +338,7 @@ ontent="width=device-width, initial-scale=1.0">
     </div>
 
     <!-- Buttons -->
-    <div class="flex flex-wrap gap-2 mb-4 items-center">
+    <div id="toolbar-bar" class="flex flex-wrap gap-2 mb-4 items-center">
 
       <!-- Check dropdown -->
       <div class="relative">
@@ -343,10 +378,10 @@ ontent="width=device-width, initial-scale=1.0">
     </div>
 
     <!-- Layout: grid left, clues right -->
-    <div class="flex flex-col md:flex-row gap-6">
+    <div id="grid-layout" class="flex flex-col md:flex-row gap-6">
 
       <!-- Grid -->
-      <div class="flex-shrink-0">
+      <div id="grid-viewport" class="flex-shrink-0">
         <div class="xw-grid" id="xw-grid" role="grid" aria-label="Crossword grid"></div>
       </div>
 
@@ -381,8 +416,16 @@ ontent="width=device-width, initial-scale=1.0">
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <!-- Mobile custom keyboard -->
-  <div id="mob-kb"></div>
+  <!-- Mobile custom keyboard (includes compact toolbar strip) -->
+  <div id="mob-kb">
+    <div id="mob-toolbar-strip">
+      <button onclick="checkLetter()" class="mob-tool-btn">Check</button>
+      <button onclick="revealLetter()" class="mob-tool-btn">Reveal</button>
+      <button onclick="clearWord()" class="mob-tool-btn">Clear</button>
+      <button id="mob-rebus-btn" onclick="toggleRebus()" class="mob-tool-btn">Rebus</button>
+      <button id="mob-autocheck-btn" onclick="toggleAutocheck()" class="mob-tool-btn">Auto&#x2713;</button>
+    </div>
+  </div>
 
   <!-- Mobile clue drawer -->
   <div id="clue-drawer">
@@ -634,6 +677,54 @@ const inputEl = document.getElementById('xw-input');
 
 function isMobile() { return window.innerWidth < 768; }
 
+function getCellSize() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
+}
+
+function zoomToWord() {
+  if (!isMobile()) return;
+  if (selRow < 0 || selCol < 0) return;
+  const viewport = document.getElementById('grid-viewport');
+  if (!viewport) return;
+  const cells = currentWordCells();
+  if (!cells.length) return;
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  if (!vpW || !vpH) return;
+  const cs = getCellSize();
+  const minR = Math.min(...cells.map(c => c.row));
+  const maxR = Math.max(...cells.map(c => c.row));
+  const minC = Math.min(...cells.map(c => c.col));
+  const maxC = Math.max(...cells.map(c => c.col));
+  const wCols = maxC - minC + 1;
+  const wRows = maxR - minR + 1;
+  const pad = 1;
+  const scaleX = vpW  / ((wCols + 2 * pad) * cs);
+  const scaleY = vpH  / ((wRows + 2 * pad) * cs);
+  const scale  = Math.min(scaleX, scaleY, 2.5);
+  const cx = (minC + wCols / 2) * cs;
+  const cy = (minR + wRows / 2) * cs;
+  const tx = vpW / 2 - cx * scale;
+  const ty = vpH / 2 - cy * scale;
+  gridEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+}
+
+function initGridZoom() {
+  if (!isMobile()) return;
+  const viewport = document.getElementById('grid-viewport');
+  if (!viewport) return;
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  if (!vpW || !vpH) return;
+  const cs = getCellSize();
+  const gridW = W * cs;
+  const gridH = H * cs;
+  const scale = Math.min(vpW / gridW, vpH / gridH, 1);
+  const tx = (vpW - gridW * scale) / 2;
+  const ty = (vpH - gridH * scale) / 2;
+  gridEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+}
+
 function focusInput() {
   if (isMobile()) return; // custom keyboard handles input on mobile
   if (selRow >= 0 && selCol >= 0) {
@@ -646,16 +737,7 @@ function focusInput() {
 }
 
 function scrollCellIntoView() {
-  if (!isMobile() || selRow < 0) return;
-  const cellEl = cellEls[selRow][selCol];
-  const rect = cellEl.getBoundingClientRect();
-  const kbHeight = 180;
-  const topOffset = 56 + 48; // nav + mob clue nav
-  const visibleBottom = window.innerHeight - kbHeight;
-  if (rect.top < topOffset || rect.bottom > visibleBottom) {
-    const target = window.scrollY + rect.top - topOffset - 16;
-    window.scrollTo({top: Math.max(0, target), behavior: 'smooth'});
-  }
+  zoomToWord();
 }
 
 // Mobile: beforeinput fires reliably for backspace on virtual keyboards
@@ -786,7 +868,6 @@ function advanceInWord() {
     selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
     selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
     applyHighlights();
-    scrollCellIntoView();
   }
 }
 
@@ -871,6 +952,8 @@ function toggleRebus() {
   btn.classList.toggle('border-navy', !rebusMode);
   btn.classList.toggle('text-navy', !rebusMode);
   btn.dataset.on = rebusMode ? '1' : '0';
+  const mobBtn = document.getElementById('mob-rebus-btn');
+  if (mobBtn) mobBtn.classList.toggle('active', rebusMode);
 }
 function exitRebus() {
   if (!rebusMode) return;
@@ -879,6 +962,8 @@ function exitRebus() {
   btn.classList.remove('bg-navy', 'text-white');
   btn.classList.add('border-navy', 'text-navy');
   btn.dataset.on = '0';
+  const mobBtn = document.getElementById('mob-rebus-btn');
+  if (mobBtn) mobBtn.classList.remove('active');
 }
 
 let autocheck = false;
@@ -891,6 +976,8 @@ function toggleAutocheck() {
   btn.classList.toggle('border-navy', !autocheck);
   btn.classList.toggle('text-navy', !autocheck);
   btn.dataset.on = autocheck ? '1' : '0';
+  const mobBtn = document.getElementById('mob-autocheck-btn');
+  if (mobBtn) mobBtn.classList.toggle('active', autocheck);
   if (autocheck) checkAll();
 }
 
@@ -1052,6 +1139,7 @@ function toggleSelDir() {
     selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
     selDownIdx   = cellDownIdx[`${selRow},${selCol}`] !== undefined   ? cellDownIdx[`${selRow},${selCol}`]   : -1;
     applyHighlights();
+    zoomToWord();
   }
 }
 
@@ -1091,10 +1179,14 @@ function closeClueDrawer() {
 // ============================================================
 // Init
 // ============================================================
-// Select first across word on load
-if (PUZZLE.across.length > 0) {
-  selectWord('across', 0);
-}
+// Wait one frame so layout is fully computed before measuring grid-viewport
+requestAnimationFrame(() => {
+  if (PUZZLE.across.length > 0) {
+    selectWord('across', 0);
+  } else {
+    initGridZoom();
+  }
+});
 </script>
 </body>
 </html>
