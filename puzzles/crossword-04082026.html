@@ -737,7 +737,11 @@ function focusInput() {
 }
 
 function scrollCellIntoView() {
-  if (!isMobile()) zoomToWord();
+  if (isMobile()) {
+    initGridZoom();
+  } else {
+    zoomToWord();
+  }
 }
 
 // Mobile: beforeinput fires reliably for backspace on virtual keyboards
@@ -1139,7 +1143,11 @@ function toggleSelDir() {
     selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
     selDownIdx   = cellDownIdx[`${selRow},${selCol}`] !== undefined   ? cellDownIdx[`${selRow},${selCol}`]   : -1;
     applyHighlights();
-    if (!isMobile()) zoomToWord();
+    if (isMobile()) {
+      initGridZoom();
+    } else {
+      zoomToWord();
+    }
   }
 }
 
