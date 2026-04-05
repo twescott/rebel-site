@@ -766,6 +766,13 @@ function initGridZoom() {
   const tx = (vpW - gridW * scale) / 2;
   const ty = (vpH - gridH * scale) / 2;
   gridEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  // Size clue bar to match actual rendered grid width
+  const clueNav = document.getElementById('mob-clue-nav');
+  if (clueNav) {
+    const actualW = Math.round(gridW * scale);
+    clueNav.style.width = actualW + 'px';
+    clueNav.style.alignSelf = 'center';
+  }
 }
 
 function focusInput() {
