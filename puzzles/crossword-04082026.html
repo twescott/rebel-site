@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <base href="https://rebel-the-dog.com/">
   <title>And the Winner Is... &bull; Rebel's Blog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,8 +147,8 @@
       #active-clue-bar { display: none !important; }
       #toolbar-bar     { display: none !important; }
       #clue-panels     { display: none !important; }
-      #mob-clue-nav    { position: static; flex-shrink: 0; display: flex; margin: 0; }
-      #grid-layout     { flex: 1; min-height: 0; }
+      #mob-clue-nav    { position: static; flex-shrink: 0; display: flex; margin: 0; order: 2; }
+      #grid-layout     { flex: 1; min-height: 0; order: 1; }
       #grid-viewport   { width: 100%; height: 100%; overflow: hidden; position: relative; background: #fff; touch-action: none; }
       .xw-grid { position: absolute; top: 0; left: 0; transform-origin: 0 0; transition: transform 0.2s ease; }
       :root { --cell-size: 40px; --cell-font: 20px; --num-font: 9px; }
@@ -449,7 +449,7 @@
   </div>
 
   <!-- Hidden input for keyboard capture (positioned at selected cell so iOS scrolls correctly) -->
-  <input id="xw-input" type="text" inputmode="text" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:none;padding:0;margin:0;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+  <input id="xw-input" type="text" inputmode="text" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:none;padding:0;margin:0;font-size:16px;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
 <script>
 // ============================================================
@@ -737,7 +737,7 @@ function focusInput() {
 }
 
 function scrollCellIntoView() {
-  zoomToWord();
+  if (!isMobile()) zoomToWord();
 }
 
 // Mobile: beforeinput fires reliably for backspace on virtual keyboards
@@ -1139,7 +1139,7 @@ function toggleSelDir() {
     selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
     selDownIdx   = cellDownIdx[`${selRow},${selCol}`] !== undefined   ? cellDownIdx[`${selRow},${selCol}`]   : -1;
     applyHighlights();
-    zoomToWord();
+    if (!isMobile()) zoomToWord();
   }
 }
 
