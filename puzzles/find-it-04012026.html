@@ -272,14 +272,6 @@
       toastTimer = setTimeout(() => el.classList.remove('show'), duration);
     }
 
-    // ── Share ─────────────────────────────────────────────────────────────
-    document.getElementById('share-btn').addEventListener('click', () => {
-      const icons = { correct: '\uD83D\uDFE9', present: '\uD83D\uDFE8', absent: '\u2B1B' };
-      const grid  = guesses.map(g => evaluate(g).map(s => icons[s]).join('')).join('\n');
-      const text  = 'Find It! ' + guesses.length + '/' + MAX_GUESSES + '\n\n' + grid + '\n\nhttps://rebel-the-dog.com';
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
-    });
-
     // ── Physical keyboard ─────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
