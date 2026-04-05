@@ -139,7 +139,7 @@
     .toast.show { opacity: 1; }
 
     /* ── Mobile: full-viewport NYT-style layout ─────────────── */
-    @media (max-width: 767px) {
+    @media (max-width: 899px) {
       body { height: 100svh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
       header { display: none !important; }
       footer { display: none !important; }
@@ -154,7 +154,7 @@
       :root { --cell-size: 40px; --cell-font: 20px; --num-font: 9px; }
       #mob-kb { position: static !important; display: flex; }
     }
-    @media (min-width: 768px) {
+    @media (min-width: 900px) {
       #mob-clue-nav      { display: none; }
       #mob-kb            { display: none; }
       #mob-toolbar-strip { display: none; }
@@ -675,7 +675,7 @@ function selectWord(dir, idx) {
 // ============================================================
 const inputEl = document.getElementById('xw-input');
 
-function isMobile() { return window.innerWidth < 768; }
+function isMobile() { return window.innerWidth < 900; }
 
 function getCellSize() {
   return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
