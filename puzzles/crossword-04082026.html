@@ -295,6 +295,35 @@
     }
     .mob-tool-btn:active { background: #dbeafe; }
     .mob-tool-btn.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+    .mob-drop-wrap { position: relative; flex: 1; display: flex; }
+    .mob-drop-wrap .mob-tool-btn { flex: 1; }
+    .mob-drop-menu {
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 0;
+      background: #fff;
+      border: 1px solid #9ca3af;
+      border-radius: 6px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.18);
+      min-width: 80px;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .mob-drop-item {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #1e3a5f;
+      touch-action: manipulation;
+    }
+    .mob-drop-item + .mob-drop-item { border-top: 1px solid #e5e7eb; }
+    .mob-drop-item:active { background: #dbeafe; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -419,8 +448,22 @@
   <!-- Mobile custom keyboard (includes compact toolbar strip) -->
   <div id="mob-kb">
     <div id="mob-toolbar-strip">
-      <button onclick="checkLetter()" class="mob-tool-btn">Check</button>
-      <button onclick="revealLetter()" class="mob-tool-btn">Reveal</button>
+      <div class="mob-drop-wrap">
+        <button onclick="toggleMenu('mob-check-menu')" class="mob-tool-btn">Check ▾</button>
+        <div id="mob-check-menu" class="mob-drop-menu xw-menu hidden">
+          <button onclick="checkLetter();closeMenus()" class="mob-drop-item">Letter</button>
+          <button onclick="checkWord();closeMenus()" class="mob-drop-item">Word</button>
+          <button onclick="checkAll();closeMenus()" class="mob-drop-item">Puzzle</button>
+        </div>
+      </div>
+      <div class="mob-drop-wrap">
+        <button onclick="toggleMenu('mob-reveal-menu')" class="mob-tool-btn">Reveal ▾</button>
+        <div id="mob-reveal-menu" class="mob-drop-menu xw-menu hidden">
+          <button onclick="revealLetter();closeMenus()" class="mob-drop-item">Letter</button>
+          <button onclick="revealWord();closeMenus()" class="mob-drop-item">Word</button>
+          <button onclick="revealPuzzle();closeMenus()" class="mob-drop-item">Puzzle</button>
+        </div>
+      </div>
       <button onclick="clearWord()" class="mob-tool-btn">Clear</button>
       <button id="mob-rebus-btn" onclick="toggleRebus()" class="mob-tool-btn">Rebus</button>
       <button id="mob-autocheck-btn" onclick="toggleAutocheck()" class="mob-tool-btn">Auto&#x2713;</button>
@@ -940,7 +983,7 @@ function closeMenus() {
   document.querySelectorAll('.xw-menu').forEach(m => m.classList.add('hidden'));
 }
 document.addEventListener('click', e => {
-  if (!e.target.closest('.relative')) closeMenus();
+  if (!e.target.closest('.relative') && !e.target.closest('.mob-drop-wrap')) closeMenus();
 });
 
 // ============================================================
