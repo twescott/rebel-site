@@ -246,6 +246,8 @@
   const solved        = new Array(GROUPS.length).fill(false);
   let   solvedCount   = 0;
   let   toastTimer;
+  const _wrongCounts  = new Array(GROUPS.length).fill(0);
+  const _qcT0         = Date.now();
 
   // Shuffle groups and words within each group once on load
   const groupOrder   = shuffle(GROUPS.map((_, i) => i));
@@ -366,6 +368,8 @@
     if (word === GROUPS[gIdx].contrary) {
       solveGroup(gIdx);
     } else {
+      _wrongCounts[gIdx]++;
+      T.track('qc_group_guess', { connection: GROUPS[gIdx].connection, guessed: word, correct: false, attempt: _wrongCounts[gIdx] });
       btn.classList.add('wrong-flash');
       showToast('Not the contrary word — try again');
       setTimeout(() => btn.classList.remove('wrong-flash'), 500);
@@ -393,6 +397,8 @@
     revealSlots(gIdx);
     updateProgress();
 
+    T.track('qc_group_guess', { connection: g.connection, guessed: g.contrary, correct: true, wrong_attempts: _wrongCounts[gIdx] });
+
     const praise = { easy: 'Nice!', medium: 'Well done!', hard: 'Impressive!' };
     showToast(praise[g.difficulty] || 'Correct!');
 
@@ -402,6 +408,12 @@
   }
 
   function showCompletion() {
+    T.track('qc_complete', {
+      puzzle: 'Quote Contrary 04012026',
+      seconds: Math.round((Date.now() - _qcT0) / 1000),
+      total_wrong: _wrongCounts.reduce(function (s, n) { return s + n; }, 0),
+      hardest_group: GROUPS[_wrongCounts.indexOf(Math.max.apply(null, _wrongCounts))].connection,
+    });
     document.getElementById('quote-source').classList.remove('hidden');
 
     const comp = document.getElementById('completion');
@@ -422,6 +434,38 @@
   buildQuote();
   buildGroups();
   updateProgress();
-  </script>
+
+  // ── Telemetry ───────────────────────────────────────────────────────────────
+  const T = (function () {
+    const KEY  = '__POSTHOG_KEY__'; // replace with phc_... from PostHog project settings
+    const HOST = 'https://us.i.posthog.com';
+    function uid() {
+      try {
+        let v = localStorage.getItem('_ruid');
+        if (!v) {
+          v = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now().toString(36) + Math.random().toString(36).slice(2);
+          localStorage.setItem('_ruid', v);
+        }
+        return v;
+      } catch (e) { return 'anon'; }
+    }
+    return {
+      track: function (event, props) {
+        if (!KEY || KEY === '__POSTHOG_KEY__') return;
+        try {
+          const payload = JSON.stringify({
+            api_key: KEY, event: event, distinct_id: uid(),
+            properties: Object.assign({}, props, { $current_url: location.href }),
+          });
+          if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
+        } catch (e) {}
+      },
+    };
+  }());
+
+  T.track('qc_loaded', { puzzle: 'Quote Contrary 04012026' });
+</script>
 </body>
 </html>
