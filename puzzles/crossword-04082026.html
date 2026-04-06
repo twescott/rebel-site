@@ -1245,6 +1245,97 @@ requestAnimationFrame(() => {
     initGridZoom();
   }
 });
+
+  // ── Telemetry ──────────────────────────────────────────────────────────────
+  const T = (function () {
+    const KEY  = '__POSTHOG_KEY__'; // replace with phc_... from PostHog project settings
+    const HOST = 'https://us.i.posthog.com';
+    function uid() {
+      try {
+        let v = localStorage.getItem('_ruid');
+        if (!v) {
+          v = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now().toString(36) + Math.random().toString(36).slice(2);
+          localStorage.setItem('_ruid', v);
+        }
+        return v;
+      } catch (e) { return 'anon'; }
+    }
+    return {
+      track: function (event, props) {
+        if (!KEY || KEY === '__POSTHOG_KEY__') return; // no-op until key is set
+        try {
+          const payload = JSON.stringify({
+            api_key: KEY, event: event, distinct_id: uid(),
+            properties: Object.assign({}, props, { $current_url: location.href }),
+          });
+          if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
+        } catch (e) {}
+      },
+    };
+  }());
+
+  // Crossword telemetry wiring
+  (function () {
+    const _rw = revealWord, _cw = checkWord, _cc = checkComplete;
+    let _reveals = 0, _t0 = Date.now(), _done = false;
+
+    revealWord = function () {
+      var cells = currentWordCells();
+      var dir   = selDir;
+      var idx   = dir === 'across' ? selAcrossIdx : selDownIdx;
+      if (idx >= 0) {
+        _reveals++;
+        var words = dir === 'across' ? PUZZLE.across : PUZZLE.down;
+        var w     = words[idx];
+        T.track('xword_reveal_word', {
+          puzzle: PUZZLE.title, num: w.number, dir: dir,
+          clue: w.clue,
+          answer: cells.map(function (c) { return getSolution(c.row, c.col); }).join(''),
+        });
+      }
+      _rw();
+    };
+
+    checkWord = function () {
+      var cells = currentWordCells();
+      var dir   = selDir;
+      var idx   = dir === 'across' ? selAcrossIdx : selDownIdx;
+      _cw();
+      if (idx >= 0) {
+        var words    = dir === 'across' ? PUZZLE.across : PUZZLE.down;
+        var w        = words[idx];
+        var anyWrong = cells.some(function (c) { return cellState[c.row][c.col] === 'incorrect'; });
+        T.track('xword_check_word', {
+          puzzle: PUZZLE.title, num: w.number, dir: dir,
+          clue: w.clue, correct: !anyWrong,
+        });
+      }
+    };
+
+    checkComplete = function () {
+      _cc();
+      if (_done) return;
+      var ok = true;
+      outer: for (var r = 0; r < H; r++) {
+        for (var c = 0; c < W; c++) {
+          if (PUZZLE.grid[r][c].black) continue;
+          if (!userGrid[r][c] || userGrid[r][c] !== getSolution(r, c)) { ok = false; break outer; }
+        }
+      }
+      if (ok) {
+        _done = true;
+        T.track('xword_complete', {
+          puzzle: PUZZLE.title, reveals: _reveals,
+          seconds: Math.round((Date.now() - _t0) / 1000),
+        });
+      }
+    };
+
+    T.track('xword_loaded', { puzzle: PUZZLE.title });
+  }());
+
 </script>
 </body>
 </html>
