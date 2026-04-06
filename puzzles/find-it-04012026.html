@@ -245,6 +245,9 @@
         currentGuess = [];
 
         const won = result.every(s => s === 'correct');
+          T.track('findit_guess', { attempt: currentRow + 1, correct: won });
+          if (won) T.track('findit_complete', { attempts: currentRow + 1, won: true });
+          else if (currentRow + 1 >= MAX_GUESSES) T.track('findit_complete', { attempts: currentRow + 1, won: false });
         if (won) {
           gameOver = true;
           const msgs = ['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'];
@@ -280,6 +283,39 @@
 
     buildGrid();
     buildKeyboard();
+      T.track('findit_loaded', { word_len: WORD_LEN });
+  
+
+  // ── Telemetry ──────────────────────────────────────────────────────────────
+  const T = (function () {
+    const KEY  = '__POSTHOG_KEY__'; // replace with phc_... from PostHog project settings
+    const HOST = 'https://us.i.posthog.com';
+    function uid() {
+      try {
+        let v = localStorage.getItem('_ruid');
+        if (!v) {
+          v = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now().toString(36) + Math.random().toString(36).slice(2);
+          localStorage.setItem('_ruid', v);
+        }
+        return v;
+      } catch (e) { return 'anon'; }
+    }
+    return {
+      track: function (event, props) {
+        if (!KEY || KEY === '__POSTHOG_KEY__') return; // no-op until key is set
+        try {
+          const payload = JSON.stringify({
+            api_key: KEY, event: event, distinct_id: uid(),
+            properties: Object.assign({}, props, { $current_url: location.href }),
+          });
+          if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
+        } catch (e) {}
+      },
+    };
+  }());
+
   </script>
 </body>
 </html>
