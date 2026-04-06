@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <base href="https://rebel-the-dog.com/">
+  <title>Quote Contrary &bull; Rebel's Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { navy: '#1e3a5f', 'navy-dark': '#16304f' },
+          fontFamily: {
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes shake   { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+    @keyframes popIn   { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+    body { font-family: 'Inter', sans-serif; }
+
+    /* ── Word buttons ───────────────────────────────────────────────────── */
+    .word-btn {
+      padding: 0.45rem 0.9rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: #fff;
+      color: #1e293b;
+      transition: background .12s, border-color .12s, color .12s, transform .08s;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+    .word-btn:hover:not(:disabled)  { border-color: #1e3a5f; background: #eff6ff; }
+    .word-btn:active:not(:disabled) { transform: scale(0.96); }
+    .word-btn.selected  { border-color: #1e3a5f; background: #dbeafe; color: #1e3a5f; }
+    .word-btn.correct   { border-color: #15803d; background: #dcfce7; color: #15803d; pointer-events: none; }
+    .word-btn.decoy     { border-color: #d1d5db; background: #f9fafb; color: #9ca3af; pointer-events: none; }
+    .word-btn.wrong-flash { border-color: #dc2626 !important; background: #fee2e2 !important; animation: shake .35s ease; }
+
+    /* ── Group cards ───────────────────────────────────────────────────── */
+    .group-card {
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1rem 1rem 0.9rem;
+      transition: border-color .25s, background .25s;
+    }
+    .group-card.solved { border-color: #86efac; background: #f0fdf4; }
+
+    /* ── Difficulty badges ─────────────────────────────────────────────── */
+    .diff-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .diff-badge.easy   { background: #dcfce7; color: #15803d; }
+    .diff-badge.medium { background: #fef9c3; color: #a16207; }
+    .diff-badge.hard   { background: #fee2e2; color: #b91c1c; }
+
+    /* ── Quote display ─────────────────────────────────────────────────── */
+    .q-slot {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .q-word {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 2.8vw, 1.15rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+      text-align: center;
+      min-width: 1.5ch;
+    }
+    .q-word.given    { color: #6b7280; }
+    .q-word.blank    { color: transparent; background: #e2e8f0; border-radius: 4px; padding: 0 3px; animation: pulse 2s ease-in-out infinite; }
+    .q-word.revealed { color: #1e3a5f; animation: popIn .35s cubic-bezier(.17,.67,.35,1.3) both; }
+    .q-underline { height: 2px; width: 100%; min-width: 1ch; border-radius: 1px; }
+    .q-underline.given    { background: #d1d5db; }
+    .q-underline.blank    { background: #94a3b8; }
+    .q-underline.revealed { background: #1e3a5f; }
+
+    /* ── Toast ─────────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; top: 68px; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: #fff;
+      padding: 9px 18px; border-radius: 8px;
+      font-size: .85rem; font-weight: 500;
+      opacity: 0; transition: opacity .2s; z-index: 300;
+      pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── Completion ────────────────────────────────────────────────────── */
+    .completion-card {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a9e 100%);
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      color: #fff;
+      text-align: center;
+      animation: fadeUp .5s ease both;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navigation -->
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+        <a href=""           class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/"     class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="hidden sm:block px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml"   class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-[#1e3a5f] text-white py-4 md:py-8 px-4 text-center">
+    <p class="text-sky-300 text-xs font-semibold tracking-widest uppercase mb-1">April 1, 2026</p>
+    <h1 class="font-serif text-2xl md:text-4xl font-bold mb-1">Quote Contrary</h1>
+    <p class="text-blue-100 text-sm">By Rebel's Dad</p>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 py-5 space-y-4">
+
+    <!-- Instructions -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 leading-relaxed">
+      In each group, <strong>three words share a connection</strong>. Tap the one that doesn't belong — that's the <em>contrary word</em>. Read the contrary words in order to reveal a hidden quote.
+    </div>
+
+    <!-- Quote display -->
+    <div class="bg-white border border-gray-200 rounded-xl px-4 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Hidden Quote</p>
+        <p id="progress-label" class="text-xs font-semibold text-gray-400">0 / 5 found</p>
+      </div>
+      <div id="quote-display" class="flex flex-wrap gap-x-2 gap-y-3 justify-center items-end py-1">
+        <!-- built by JS -->
+      </div>
+      <p id="quote-source" class="hidden mt-3 text-center text-sm text-gray-400 italic">— Proverb</p>
+    </div>
+
+    <!-- Group cards (rendered by JS) -->
+    <div id="groups-container" class="space-y-3"></div>
+
+    <!-- Completion (hidden until all solved) -->
+    <div id="completion" class="hidden"></div>
+
+  </main>
+
+  <footer class="bg-[#1e3a5f] mt-12">
+    <div class="max-w-5xl mx-auto px-5 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="feed.xml"   class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
+        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
+      </div>
+    </div>
+    <div class="border-t border-[#2d4f7a] text-center py-3">
+      <p class="text-sky-300 text-xs">This puzzle is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="underline hover:text-white transition-colors">CC BY-SA 4.0</a>.</p>
+    </div>
+  </footer>
+
+  <div id="toast"></div>
+
+  <script>
+  // ── Puzzle data ────────────────────────────────────────────────────────────
+  // Contrary words are base64-encoded to avoid spoilers in source.
+
+  const QUOTE_WORDS = [
+    { word: atob('QQ=='),      given: false, groupIdx: 0 }, // A
+    { word: atob('Rk9PTA=='),  given: false, groupIdx: 1 }, // FOOL
+    { word: 'AND',             given: true  },
+    { word: 'HIS',             given: true  },
+    { word: atob('TU9ORVk='),  given: false, groupIdx: 2 }, // MONEY
+    { word: 'ARE',             given: true  },
+    { word: atob('U09PTg=='),  given: false, groupIdx: 3 }, // SOON
+    { word: atob('UEFSVEVE'),  given: false, groupIdx: 4 }, // PARTED
+  ];
+
+  // connection: what the three DECOYS share (not the contrary word)
+  const GROUPS = [
+    {
+      contrary:   atob('QQ=='),
+      decoys:     ['B', 'C', 'D'],
+      connection: 'Consonants',
+      difficulty: 'easy',
+    },
+    {
+      contrary:   atob('Rk9PTA=='),
+      decoys:     ['JOKER', 'X-FACTOR', 'WILDCARD'],
+      connection: 'Unknown elements',
+      difficulty: 'hard',
+    },
+    {
+      contrary:   atob('TU9ORVk='),
+      decoys:     ['DOLLAR', 'BUDGET', 'ENTERPRISE'],
+      connection: 'Car rental companies',
+      difficulty: 'medium',
+    },
+    {
+      contrary:   atob('U09PTg=='),
+      decoys:     ['PDQ', 'STAT', 'ASAP'],
+      connection: 'Abbreviations',
+      difficulty: 'easy',
+    },
+    {
+      contrary:   atob('UEFSVEVE'),
+      decoys:     ['DIVIDED', 'ADDED', 'SUBTRACTED'],
+      connection: 'Past-tense math operations',
+      difficulty: 'easy',
+    },
+  ];
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  const solved        = new Array(GROUPS.length).fill(false);
+  let   solvedCount   = 0;
+  let   toastTimer;
+
+  // Shuffle groups and words within each group once on load
+  const groupOrder   = shuffle(GROUPS.map((_, i) => i));
+  const wordOrders   = GROUPS.map(g => shuffle([g.contrary, ...g.decoys]));
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function showToast(msg, ms = 1800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+  }
+
+  // ── Quote display ──────────────────────────────────────────────────────────
+  function buildQuote() {
+    const container = document.getElementById('quote-display');
+    container.innerHTML = '';
+    QUOTE_WORDS.forEach((entry, i) => {
+      const slot = document.createElement('div');
+      slot.className = 'q-slot';
+      slot.id = 'slot-' + i;
+
+      const word = document.createElement('span');
+      word.className = 'q-word ' + (entry.given ? 'given' : 'blank');
+      // For blank slots, show same number of non-breaking spaces to size the bar properly
+      word.textContent = entry.given ? entry.word : '\u00A0'.repeat(Math.max(entry.word.length, 2));
+
+      const line = document.createElement('div');
+      line.className = 'q-underline ' + (entry.given ? 'given' : 'blank');
+
+      slot.appendChild(word);
+      slot.appendChild(line);
+      container.appendChild(slot);
+    });
+  }
+
+  function revealSlots(groupIdx) {
+    QUOTE_WORDS.forEach((entry, i) => {
+      if (entry.given || entry.groupIdx !== groupIdx) return;
+      const slot  = document.getElementById('slot-' + i);
+      const word  = slot.querySelector('.q-word');
+      const line  = slot.querySelector('.q-underline');
+      word.textContent = entry.word;
+      word.className   = 'q-word revealed';
+      line.className   = 'q-underline revealed';
+    });
+  }
+
+  function updateProgress() {
+    document.getElementById('progress-label').textContent = solvedCount + ' / ' + GROUPS.length + ' found';
+  }
+
+  // ── Group cards ────────────────────────────────────────────────────────────
+  function buildGroups() {
+    const container = document.getElementById('groups-container');
+    groupOrder.forEach(gIdx => {
+      const g    = GROUPS[gIdx];
+      const card = document.createElement('div');
+      card.className = 'group-card';
+      card.id = 'card-' + gIdx;
+
+      // Header
+      const hdr = document.createElement('div');
+      hdr.className = 'flex items-start justify-between gap-2 mb-3';
+
+      const conn = document.createElement('p');
+      conn.className = 'text-sm font-semibold text-gray-700 leading-snug';
+      conn.textContent = g.connection;
+
+      const badge = document.createElement('span');
+      badge.className = 'diff-badge ' + g.difficulty;
+      badge.textContent = g.difficulty;
+
+      hdr.appendChild(conn);
+      hdr.appendChild(badge);
+      card.appendChild(hdr);
+
+      // Word buttons
+      const btnWrap = document.createElement('div');
+      btnWrap.className = 'flex flex-wrap gap-2';
+      btnWrap.id = 'btns-' + gIdx;
+
+      wordOrders[gIdx].forEach(word => {
+        const btn = document.createElement('button');
+        btn.className = 'word-btn';
+        btn.textContent = word;
+        btn.dataset.word = word;
+        btn.addEventListener('click', () => handleGuess(gIdx, word, btn));
+        btnWrap.appendChild(btn);
+      });
+
+      card.appendChild(btnWrap);
+
+      // Contrary reveal (hidden until solved)
+      const reveal = document.createElement('div');
+      reveal.id = 'reveal-' + gIdx;
+      reveal.className = 'hidden mt-3 pt-3 border-t border-green-200 text-sm text-green-700';
+      reveal.innerHTML = 'Contrary word: <strong class="font-mono">' + g.contrary + '</strong>';
+      card.appendChild(reveal);
+
+      container.appendChild(card);
+    });
+  }
+
+  // ── Game logic ─────────────────────────────────────────────────────────────
+  function handleGuess(gIdx, word, btn) {
+    if (solved[gIdx]) return;
+    if (word === GROUPS[gIdx].contrary) {
+      solveGroup(gIdx);
+    } else {
+      btn.classList.add('wrong-flash');
+      showToast('Not the contrary word — try again');
+      setTimeout(() => btn.classList.remove('wrong-flash'), 500);
+    }
+  }
+
+  function solveGroup(gIdx) {
+    solved[gIdx] = true;
+    solvedCount++;
+
+    const card  = document.getElementById('card-' + gIdx);
+    const btns  = document.querySelectorAll('#btns-' + gIdx + ' .word-btn');
+    const g     = GROUPS[gIdx];
+
+    card.classList.add('solved');
+
+    btns.forEach(btn => {
+      btn.disabled = true;
+      if (btn.dataset.word === g.contrary) btn.classList.add('correct');
+      else                                  btn.classList.add('decoy');
+    });
+
+    document.getElementById('reveal-' + gIdx).classList.remove('hidden');
+
+    revealSlots(gIdx);
+    updateProgress();
+
+    const praise = { easy: 'Nice!', medium: 'Well done!', hard: 'Impressive!' };
+    showToast(praise[g.difficulty] || 'Correct!');
+
+    if (solvedCount === GROUPS.length) {
+      setTimeout(showCompletion, 700);
+    }
+  }
+
+  function showCompletion() {
+    document.getElementById('quote-source').classList.remove('hidden');
+
+    const comp = document.getElementById('completion');
+    comp.classList.remove('hidden');
+    comp.innerHTML = `
+      <div class="completion-card">
+        <p class="font-serif text-xl md:text-2xl font-bold italic mb-2 leading-snug">
+          "A Fool and His Money Are Soon Parted"
+        </p>
+        <p class="text-sky-200 text-sm mb-4">— Proverb</p>
+        <p class="text-lg font-semibold mb-1">🎉 Puzzle complete!</p>
+        <p class="text-sky-100 text-sm">Like this puzzle? Come play at Trivia Night!</p>
+      </div>
+    `;
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  buildQuote();
+  buildGroups();
+  updateProgress();
+  </script>
+</body>
+</html>
