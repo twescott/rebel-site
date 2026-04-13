@@ -124,6 +124,10 @@
       text-align: center;
       animation: fadeUp .5s ease both;
     }
+  
+    /* tentative slot (hard mode) */
+    .q-word.tentative      { color: #92400e; animation: none; }
+    .q-underline.tentative { background: #fbbf24; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -275,50 +279,28 @@
     { word: atob('UEFSVEVE'),  given: false, groupIdx: 4 }, // PARTED
   ];
 
-  // connection: what the three DECOYS share (not the contrary word)
   const GROUPS = [
-    {
-      contrary:   atob('QQ=='),
-      decoys:     ['B', 'C', 'D'],
-      connection: 'Consonants',
-      difficulty: 'easy',
-    },
-    {
-      contrary:   atob('Rk9PTA=='),
-      decoys:     ['JOKER', 'X-FACTOR', 'WILDCARD'],
-      connection: 'Unknown elements',
-      difficulty: 'hard',
-    },
-    {
-      contrary:   atob('TU9ORVk='),
-      decoys:     ['DOLLAR', 'BUDGET', 'ENTERPRISE'],
-      connection: 'Car rental companies',
-      difficulty: 'medium',
-    },
-    {
-      contrary:   atob('U09PTg=='),
-      decoys:     ['PDQ', 'STAT', 'ASAP'],
-      connection: 'Abbreviations',
-      difficulty: 'easy',
-    },
-    {
-      contrary:   atob('UEFSVEVE'),
-      decoys:     ['DIVIDED', 'ADDED', 'SUBTRACTED'],
-      connection: 'Past-tense math operations',
-      difficulty: 'easy',
-    },
+    { contrary: atob('QQ=='),      decoys: ['B','C','D'],                    connection: 'Consonants',                difficulty: 'easy'   },
+    { contrary: atob('Rk9PTA=='),  decoys: ['JOKER','X-FACTOR','WILDCARD'],  connection: 'Unknown elements',          difficulty: 'hard'   },
+    { contrary: atob('TU9ORVk='),  decoys: ['DOLLAR','BUDGET','ENTERPRISE'], connection: 'Car rental companies',      difficulty: 'medium' },
+    { contrary: atob('U09PTg=='),  decoys: ['PDQ','STAT','ASAP'],            connection: 'Abbreviations',             difficulty: 'easy'   },
+    { contrary: atob('UEFSVEVE'),  decoys: ['DIVIDED','ADDED','SUBTRACTED'], connection: 'Past-tense math operations',difficulty: 'easy'   },
   ];
 
+  // ── Display order: always easy → medium → hard ─────────────────────────────
+  const DIFF_ORDER = { easy: 0, medium: 1, hard: 2 };
+  const groupOrder = GROUPS.map((_, i) => i)
+    .sort((a, b) => DIFF_ORDER[GROUPS[a].difficulty] - DIFF_ORDER[GROUPS[b].difficulty]);
+  const wordOrders = GROUPS.map(g => shuffle([g.contrary, ...g.decoys]));
+
   // ── State ──────────────────────────────────────────────────────────────────
+  let   mode          = 'easy';
   const solved        = new Array(GROUPS.length).fill(false);
   let   solvedCount   = 0;
   let   toastTimer;
   const _wrongCounts  = new Array(GROUPS.length).fill(0);
   const _qcT0         = Date.now();
-
-  // Shuffle groups and words within each group once on load
-  const groupOrder   = shuffle(GROUPS.map((_, i) => i));
-  const wordOrders   = GROUPS.map(g => shuffle([g.contrary, ...g.decoys]));
+  const hardSel       = new Array(GROUPS.length).fill(null);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function shuffle(arr) {
@@ -338,6 +320,49 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), ms);
   }
 
+  function wrongFlash(el) {
+    el.classList.add('wrong-flash');
+    setTimeout(() => el.classList.remove('wrong-flash'), 500);
+  }
+
+  // ── Mode toggle ────────────────────────────────────────────────────────────
+  function initModeToggle() {
+    const wrap = document.createElement('div');
+    wrap.className = 'flex rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm mb-4';
+    wrap.innerHTML =
+      '<button id="btn-easy" data-mode="easy" class="mode-btn flex-1 py-2 text-sm font-semibold transition-colors">Easy</button>' +
+      '<button id="btn-hard" data-mode="hard" class="mode-btn flex-1 py-2 text-sm font-semibold transition-colors border-l border-gray-200">Hard</button>';
+    document.getElementById('groups-container').before(wrap);
+    wrap.addEventListener('click', e => { const m = e.target.closest('[data-mode]')?.dataset.mode; if (m) setMode(m); });
+    updateModeUI();
+  }
+
+  function updateModeUI() {
+    document.querySelectorAll('.mode-btn').forEach(b => {
+      const on = b.dataset.mode === mode;
+      b.classList.toggle('bg-[#1e3a5f]', on);
+      b.classList.toggle('text-white', on);
+      b.classList.toggle('text-gray-500', !on);
+    });
+    const cb = document.getElementById('hard-check-btn');
+    if (cb) {
+      cb.classList.toggle('hidden', mode !== 'hard');
+      if (mode === 'hard') updateCheckBtn();
+    }
+  }
+
+  function setMode(m) {
+    if (m === mode) return;
+    mode = m;
+    GROUPS.forEach((_, i) => {
+      if (solved[i]) return;
+      hardSel[i] = null;
+      clearTentativeSlot(i);
+      document.querySelectorAll('#btns-' + i + ' .word-btn').forEach(b => b.classList.remove('selected'));
+    });
+    updateModeUI();
+  }
+
   // ── Quote display ──────────────────────────────────────────────────────────
   function buildQuote() {
     const container = document.getElementById('quote-display');
@@ -349,8 +374,7 @@
 
       const word = document.createElement('span');
       word.className = 'q-word ' + (entry.given ? 'given' : 'blank');
-      // For blank slots, show same number of non-breaking spaces to size the bar properly
-      word.textContent = entry.given ? entry.word : '\u00A0'.repeat(Math.max(entry.word.length, 2));
+      word.textContent = entry.given ? entry.word : ' '.repeat(Math.max(entry.word.length, 2));
 
       const line = document.createElement('div');
       line.className = 'q-underline ' + (entry.given ? 'given' : 'blank');
@@ -361,15 +385,35 @@
     });
   }
 
-  function revealSlots(groupIdx) {
+  function revealSlots(gIdx) {
     QUOTE_WORDS.forEach((entry, i) => {
-      if (entry.given || entry.groupIdx !== groupIdx) return;
-      const slot  = document.getElementById('slot-' + i);
-      const word  = slot.querySelector('.q-word');
-      const line  = slot.querySelector('.q-underline');
-      word.textContent = entry.word;
-      word.className   = 'q-word revealed';
-      line.className   = 'q-underline revealed';
+      if (entry.given || entry.groupIdx !== gIdx) return;
+      const slot = document.getElementById('slot-' + i);
+      slot.querySelector('.q-word').textContent   = entry.word;
+      slot.querySelector('.q-word').className     = 'q-word revealed';
+      slot.querySelector('.q-underline').className = 'q-underline revealed';
+    });
+  }
+
+  function setTentativeSlot(gIdx, word) {
+    QUOTE_WORDS.forEach((entry, i) => {
+      if (entry.given || entry.groupIdx !== gIdx) return;
+      const slot = document.getElementById('slot-' + i);
+      slot.querySelector('.q-word').textContent   = word;
+      slot.querySelector('.q-word').className     = 'q-word tentative';
+      slot.querySelector('.q-underline').className = 'q-underline tentative';
+    });
+  }
+
+  function clearTentativeSlot(gIdx) {
+    QUOTE_WORDS.forEach((entry, i) => {
+      if (entry.given || entry.groupIdx !== gIdx) return;
+      const slot = document.getElementById('slot-' + i);
+      const wEl  = slot.querySelector('.q-word');
+      if (wEl.classList.contains('revealed')) return;
+      wEl.textContent = ' '.repeat(Math.max(entry.word.length, 2));
+      wEl.className   = 'q-word blank';
+      slot.querySelector('.q-underline').className = 'q-underline blank';
     });
   }
 
@@ -386,7 +430,6 @@
       card.className = 'group-card';
       card.id = 'card-' + gIdx;
 
-      // Header
       const hdr = document.createElement('div');
       hdr.className = 'flex items-start justify-between gap-2 mb-3';
 
@@ -403,7 +446,6 @@
       hdr.appendChild(badge);
       card.appendChild(hdr);
 
-      // Word buttons
       const btnWrap = document.createElement('div');
       btnWrap.className = 'flex flex-wrap gap-2';
       btnWrap.id = 'btns-' + gIdx;
@@ -413,56 +455,108 @@
         btn.className = 'word-btn';
         btn.textContent = word;
         btn.dataset.word = word;
-        btn.addEventListener('click', () => handleGuess(gIdx, word, btn));
+        btn.addEventListener('click', () => {
+          if (mode === 'easy') handleClickEasy(gIdx, word, btn);
+          else                 handleClickHard(gIdx, word);
+        });
         btnWrap.appendChild(btn);
       });
 
       card.appendChild(btnWrap);
 
-      // Contrary reveal (hidden until solved)
       const reveal = document.createElement('div');
       reveal.id = 'reveal-' + gIdx;
       reveal.className = 'hidden mt-3 pt-3 border-t border-green-200 text-sm text-green-700';
-      reveal.innerHTML = 'Contrary word: <strong class="font-mono">' + g.contrary + '</strong>';
+      reveal.innerHTML = 'Contrary word: <strong class="font-mono">' + g.contrary + '<\/strong>';
       card.appendChild(reveal);
 
       container.appendChild(card);
     });
   }
 
-  // ── Game logic ─────────────────────────────────────────────────────────────
-  function handleGuess(gIdx, word, btn) {
+  // ── Check button (hard mode) ───────────────────────────────────────────────
+  function injectCheckButton() {
+    const btn = document.createElement('button');
+    btn.id = 'hard-check-btn';
+    btn.className = 'hidden w-full py-3 rounded-xl bg-[#1e3a5f] text-white font-semibold text-sm opacity-50 transition-colors hover:bg-[#162d4a] disabled:cursor-not-allowed';
+    btn.textContent = 'Check Answers';
+    btn.disabled = true;
+    document.getElementById('groups-container').after(btn);
+    btn.addEventListener('click', doHardCheck);
+  }
+
+  function updateCheckBtn() {
+    const btn = document.getElementById('hard-check-btn');
+    if (!btn) return;
+    const allPicked = GROUPS.every((_, i) => solved[i] || hardSel[i] !== null);
+    btn.disabled = !allPicked;
+    btn.classList.toggle('opacity-50', !allPicked);
+  }
+
+  // ── Easy mode: immediate feedback ─────────────────────────────────────────
+  function handleClickEasy(gIdx, word, btn) {
     if (solved[gIdx]) return;
     if (word === GROUPS[gIdx].contrary) {
       solveGroup(gIdx);
     } else {
       _wrongCounts[gIdx]++;
       T.track('qc_group_guess', { connection: GROUPS[gIdx].connection, guessed: word, correct: false, attempt: _wrongCounts[gIdx] });
-      btn.classList.add('wrong-flash');
+      wrongFlash(btn);
       showToast('Not the contrary word — try again');
-      setTimeout(() => btn.classList.remove('wrong-flash'), 500);
     }
   }
 
+  // ── Hard mode: select → fill quote tentatively → check all at once ─────────
+  function handleClickHard(gIdx, word) {
+    if (solved[gIdx]) return;
+    hardSel[gIdx] = word;
+    document.querySelectorAll('#btns-' + gIdx + ' .word-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.word === word);
+    });
+    setTentativeSlot(gIdx, word);
+    updateCheckBtn();
+  }
+
+  function doHardCheck() {
+    let anyWrong = false;
+    GROUPS.forEach((g, gIdx) => {
+      if (solved[gIdx] || !hardSel[gIdx]) return;
+      if (hardSel[gIdx] === g.contrary) {
+        solveGroup(gIdx);
+      } else {
+        anyWrong = true;
+        _wrongCounts[gIdx]++;
+        T.track('qc_group_guess', { connection: g.connection, guessed: hardSel[gIdx], correct: false, attempt: _wrongCounts[gIdx] });
+        const sel = hardSel[gIdx];
+        const wrongBtn = [...document.querySelectorAll('#btns-' + gIdx + ' .word-btn')]
+          .find(b => b.dataset.word === sel);
+        if (wrongBtn) wrongFlash(wrongBtn);
+        hardSel[gIdx] = null;
+        clearTentativeSlot(gIdx);
+        document.querySelectorAll('#btns-' + gIdx + ' .word-btn').forEach(b => b.classList.remove('selected'));
+      }
+    });
+    if (anyWrong) showToast('Some selections were wrong — try again');
+    updateCheckBtn();
+  }
+
+  // ── Solve group (shared by both modes) ────────────────────────────────────
   function solveGroup(gIdx) {
     solved[gIdx] = true;
     solvedCount++;
 
-    const card  = document.getElementById('card-' + gIdx);
-    const btns  = document.querySelectorAll('#btns-' + gIdx + ' .word-btn');
-    const g     = GROUPS[gIdx];
+    const card = document.getElementById('card-' + gIdx);
+    const btns = document.querySelectorAll('#btns-' + gIdx + ' .word-btn');
+    const g    = GROUPS[gIdx];
 
     card.classList.add('solved');
-    document.getElementById('conn-' + gIdx)?.classList.remove('hidden');
-
     btns.forEach(btn => {
       btn.disabled = true;
-      if (btn.dataset.word === g.contrary) btn.classList.add('correct');
-      else                                  btn.classList.add('decoy');
+      btn.classList.add(btn.dataset.word === g.contrary ? 'correct' : 'decoy');
     });
 
+    document.getElementById('conn-' + gIdx)?.classList.remove('hidden');
     document.getElementById('reveal-' + gIdx).classList.remove('hidden');
-
     revealSlots(gIdx);
     updateProgress();
 
@@ -471,42 +565,41 @@
     const praise = { easy: 'Nice!', medium: 'Well done!', hard: 'Impressive!' };
     showToast(praise[g.difficulty] || 'Correct!');
 
-    if (solvedCount === GROUPS.length) {
-      setTimeout(showCompletion, 700);
-    }
+    if (solvedCount === GROUPS.length) setTimeout(showCompletion, 700);
   }
 
+  // ── Completion ─────────────────────────────────────────────────────────────
   function showCompletion() {
     T.track('qc_complete', {
       puzzle: 'Quote Contrary 04012026',
       seconds: Math.round((Date.now() - _qcT0) / 1000),
-      total_wrong: _wrongCounts.reduce(function (s, n) { return s + n; }, 0),
-      hardest_group: GROUPS[_wrongCounts.indexOf(Math.max.apply(null, _wrongCounts))].connection,
+      total_wrong: _wrongCounts.reduce((s, n) => s + n, 0),
+      hardest_group: GROUPS[_wrongCounts.indexOf(Math.max(..._wrongCounts))].connection,
     });
     document.getElementById('quote-source').classList.remove('hidden');
-
     const comp = document.getElementById('completion');
     comp.classList.remove('hidden');
-    comp.innerHTML = `
-      <div class="completion-card">
-        <p class="font-serif text-xl md:text-2xl font-bold italic mb-2 leading-snug">
-          "A Fool and His Money Are Soon Parted"
-        </p>
-        <p class="text-sky-200 text-sm mb-4">— Proverb</p>
-        <p class="text-lg font-semibold mb-1">🎉 Puzzle complete!</p>
-        <p class="text-sky-100 text-sm">Like this puzzle? Come play at Trivia Night!</p>
-      </div>
-    `;
+    comp.innerHTML =
+      '<div class="completion-card">' +
+        '<p class="font-serif text-xl md:text-2xl font-bold italic mb-2 leading-snug">' +
+          '&ldquo;A Fool and His Money Are Soon Parted&rdquo;' +
+        '<\/p>' +
+        '<p class="text-sky-200 text-sm mb-4">&mdash; Proverb<\/p>' +
+        '<p class="text-lg font-semibold mb-1">🎉 Puzzle complete!<\/p>' +
+        '<p class="text-sky-100 text-sm">Like this puzzle? Come play at Trivia Night!<\/p>' +
+      '<\/div>';
   }
 
   // ── Init ───────────────────────────────────────────────────────────────────
+  initModeToggle();
   buildQuote();
   buildGroups();
+  injectCheckButton();
   updateProgress();
 
-  // ── Telemetry ───────────────────────────────────────────────────────────────
+  // ── Telemetry ─────────────────────────────────────────────────────────────
   const T = (function () {
-    const KEY  = '__POSTHOG_KEY__'; // replace with phc_... from PostHog project settings
+    const KEY  = '__POSTHOG_KEY__';
     const HOST = 'https://us.i.posthog.com';
     function uid() {
       try {
@@ -525,7 +618,7 @@
         if (!KEY || KEY === '__POSTHOG_KEY__') return;
         try {
           const payload = JSON.stringify({
-            api_key: KEY, event: event, distinct_id: uid(),
+            api_key: KEY, event, distinct_id: uid(),
             properties: Object.assign({}, props, { $current_url: location.href }),
           });
           if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
@@ -535,6 +628,6 @@
   }());
 
   T.track('qc_loaded', { puzzle: 'Quote Contrary 04012026' });
-</script>
+  </script>
 </body>
 </html>
