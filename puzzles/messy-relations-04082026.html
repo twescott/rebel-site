@@ -26,48 +26,14 @@
   </script>
   <link rel="alternate" type="application/rss+xml" title="Rebel's Blog" href="feed.xml">
   <style>
-    /* Letter boxes */
-    .letter-box {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      text-align: center;
-      text-transform: uppercase;
-      background: white;
-      border: none;
-      border-bottom: 2px solid #44403c;
-      outline: none;
-      caret-color: transparent;
-      color: #1c1917;
-      transition: background 0.15s, border-color 0.15s;
+    /* Word input */
+    .word-input:focus {
+      border-bottom-color: #ca8a04;
+      background: #fefce8;
     }
-    .letter-box.circled {
-      border: 2px solid #44403c;
-      border-radius: 50%;
+    .word-input:disabled {
+      pointer-events: none;
     }
-    .letter-box:focus {
-      background: #fef9c3;
-      border-color: #ca8a04;
-    }
-    .letter-box.circled:focus {
-      background: #fef9c3;
-      border-color: #ca8a04;
-    }
-    .letter-box.correct {
-      background: #dcfce7 !important;
-      border-color: #16a34a !important;
-      color: #15803d;
-    }
-    .letter-box.correct.circled {
-      background: #bbf7d0 !important;
-      border-color: #15803d !important;
-    }
-    .letter-box[disabled] { pointer-events: none; }
     /* Shake animation for wrong answers */
     @keyframes shake {
       0%,100% { transform: translateX(0); }
@@ -157,87 +123,115 @@
     <div id="entries" style="display:flex;flex-direction:column;gap:1.25rem;margin-bottom:2rem">
 
     <div class="mr-entry" data-entry="0" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">1.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Word after &quot;boy&quot; or &quot;chew&quot;</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box" data-entry="0" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="0" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="0" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
       </div>
+      <input type="text" class="word-input" data-entry="0" data-letters="TOY"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="1" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">2.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Toto in &quot;The Wizard of Oz&quot;, eg.</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="1" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
       </div>
+      <input type="text" class="word-input" data-entry="1" data-letters="TERRIER"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="2" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">3.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">A fox's unusual friend in a Disney movie</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="2" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="2" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
       </div>
+      <input type="text" class="word-input" data-entry="2" data-letters="HOUND"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="3" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">4.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Useful instinct for ranchers</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box circled" data-entry="3" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="3" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
       </div>
+      <input type="text" class="word-input" data-entry="3" data-letters="HERDING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="4" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">5.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Fair</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box circled" data-entry="4" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="4" data-char="7" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span>
       </div>
+      <input type="text" class="word-input" data-entry="4" data-letters="SPORTING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="5" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">6.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Like Melanie Griffith's character in a 1988 movie</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box circled" data-entry="5" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="5" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span>
       </div>
+      <input type="text" class="word-input" data-entry="5" data-letters="WORKING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
 
     <div class="mr-entry" data-entry="6" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
         <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">7.</span>
         <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Opposite of #5</span>
         <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
         <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
       </div>
-      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-        <input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><span style="font-size:1.1rem;font-weight:700;color:#44403c;line-height:2rem;margin:0 1px">-</span><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="7" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="8" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="9" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="10" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="11" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span style="font-weight:700;color:#57534e;font-size:1rem;line-height:1.75rem;margin:0 1px">-</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
       </div>
+      <input type="text" class="word-input" data-entry="6" data-letters="NONSPORTING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
     </div>
     </div>
 
@@ -316,103 +310,71 @@ const state = {
 
 // ── Attach events to statically-rendered entries ───────────────────────────
 PUZZLE.entries.forEach((entry, ei) => {
-  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
-  const boxes = [...wrap.querySelectorAll('.letter-box')];
+  const wrap  = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const input = wrap.querySelector('.word-input');
+  const expected = input.dataset.letters; // letters without hyphens
 
-  boxes.forEach((inp, bi) => {
-    inp.addEventListener('keydown', function(e) { handleKey(e, ei, bi, boxes); });
-    inp.addEventListener('input', function() {
-      const v = inp.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(-1);
-      inp.value = v;
-      if (v) {
-        if (bi + 1 < boxes.length) {
-          boxes[bi + 1].focus();
-        } else {
-          setTimeout(function() { checkEntry(ei, boxes); }, 10);
-        }
-      }
-    });
+  input.addEventListener('keydown', function(e) {
+    if (state.solved[ei]) { e.preventDefault(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); trySubmit(ei, input, expected); }
+  });
+  input.addEventListener('input', function() {
+    if (state.solved[ei]) return;
+    // Force uppercase letters only
+    const v = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    input.value = v;
+    // Auto-check when length matches the answer
+    if (v.length === expected.length) {
+      setTimeout(function() { trySubmit(ei, input, expected); }, 30);
+    }
   });
 });
 
-// ── Key handler ────────────────────────────────────────────────────────────
-function handleKey(e, ei, bi, boxes) {
-  if (state.solved[ei]) { e.preventDefault(); return; }
-
-  if (e.key === 'Backspace') {
-    e.preventDefault();
-    if (boxes[bi].value) {
-      boxes[bi].value = '';
-    } else if (bi > 0) {
-      boxes[bi - 1].value = '';
-      boxes[bi - 1].focus();
-    }
-  } else if (e.key === 'ArrowLeft' && bi > 0) {
-    e.preventDefault();
-    boxes[bi - 1].focus();
-  } else if (e.key === 'ArrowRight' && bi < boxes.length - 1) {
-    e.preventDefault();
-    boxes[bi + 1].focus();
-  } else if (e.key === 'Enter') {
-    checkEntry(ei, boxes);
-  }
-}
-
 // ── Entry validation ───────────────────────────────────────────────────────
-function getEntryBoxes(ei) {
-  return [...document.querySelectorAll('[data-entry="' + ei + '"].letter-box')];
-}
-
-function checkEntry(ei, boxes) {
+function trySubmit(ei, input, expected) {
   if (state.solved[ei]) return;
-  const typed = boxes.map(b => b.value.toUpperCase()).join('');
-  if (typed.length < boxes.length) return; // incomplete
-
-  const entry = PUZZLE.entries[ei];
-
-  // Strip hyphens from correct word for comparison mapping
-  // boxes array excludes hyphens, so compare letter-by-letter
-  const wordLetters = entry.word.split('').filter(c => c !== '-');
-
-  if (typed === wordLetters.join('')) {
-    markCorrect(ei, boxes);
+  const typed = input.value.replace(/[^A-Z]/g, '');
+  if (typed.length < expected.length) return;
+  if (typed === expected) {
+    markCorrect(ei, input);
   } else {
-    markWrong(ei, boxes);
+    markWrong(ei, input);
   }
 }
 
-function markCorrect(ei, boxes) {
+function markCorrect(ei, input) {
   state.solved[ei] = true;
   const entry = PUZZLE.entries[ei];
   const wordLetters = entry.word.split('').filter(c => c !== '-');
 
-  boxes.forEach((b, bi) => {
-    b.classList.add('correct');
-    b.disabled = true;
-  });
+  // Hide input, show filled slot row with actual letters
+  input.style.display = 'none';
+  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const slotRow = wrap.querySelector('.slot-row');
+  const circleSet = new Set(entry.circlePositions);
+  let li = 0;
+  slotRow.innerHTML = entry.word.split('').map((ch, ci) => {
+    if (ch === '-') return '<span style="font-weight:700;color:#57534e;font-size:1rem;line-height:1.75rem;margin:0 1px">-</span>';
+    const isCircled = circleSet.has(ci + 1);
+    const letter = wordLetters[li++];
+    return isCircled
+      ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #15803d;border-radius:50%;background:#bbf7d0;font-weight:700;font-size:.875rem;color:#14532d">' + letter + '</span>'
+      : '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #16a34a;font-weight:700;font-size:.875rem;color:#15803d">' + letter + '</span>';
+  }).join('');
 
   // Show checkmark
-  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
   const cm = wrap.querySelector('.check-mark');
   if (cm) cm.style.display = 'inline';
 
-  // Collect circled letters
-  // circlePositions are 1-based over the full word (including hyphens)
-  // Map to box index: iterate word chars, skip hyphens, track box index
-  const circleSet = new Set(entry.circlePositions);
+  // Collect circled letters into the pool
   const newLetters = [];
-  let boxIdx = 0;
+  let bi = 0;
   entry.word.split('').forEach((ch, ci) => {
     if (ch === '-') return;
-    if (circleSet.has(ci + 1)) {
-      newLetters.push(wordLetters[boxIdx]);
-    }
-    boxIdx++;
+    if (circleSet.has(ci + 1)) newLetters.push(wordLetters[bi]);
+    bi++;
   });
-
-  // Shuffle new letters among themselves before adding
-  const shuffled = newLetters.sort(() => Math.random() - 0.5);
-  state.collectedLetters.push(...shuffled);
+  state.collectedLetters.push(...newLetters.sort(() => Math.random() - 0.5));
 
   state.score += 1;
   updateScore();
@@ -420,14 +382,14 @@ function markCorrect(ei, boxes) {
   checkAllDone();
 }
 
-function markWrong(ei, boxes) {
-  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
-  const boxRow = wrap.querySelector('.box-row');
-  boxRow.classList.add('shake');
-  setTimeout(() => {
-    boxRow.classList.remove('shake');
-    boxes.forEach(b => { b.value = ''; b.classList.remove('correct'); });
-    boxes[0].focus();
+function markWrong(ei, input) {
+  input.classList.add('shake');
+  input.style.borderBottomColor = '#dc2626';
+  setTimeout(function() {
+    input.classList.remove('shake');
+    input.style.borderBottomColor = '#44403c';
+    input.value = '';
+    input.focus();
   }, 350);
 }
 
