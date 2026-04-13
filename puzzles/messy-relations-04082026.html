@@ -68,13 +68,6 @@
       border-color: #15803d !important;
     }
     .letter-box[disabled] { pointer-events: none; }
-    .letter-hyphen {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #44403c;
-      line-height: 2rem;
-      margin: 0 1px;
-    }
     /* Shake animation for wrong answers */
     @keyframes shake {
       0%,100% { transform: translateX(0); }
@@ -160,8 +153,93 @@
       </div>
     </div>
 
-    <!-- Entries -->
-    <div id="entries" class="flex flex-col gap-5 mb-8"></div>
+    <!-- Entries (statically generated) -->
+    <div id="entries" style="display:flex;flex-direction:column;gap:1.25rem;margin-bottom:2rem">
+
+    <div class="mr-entry" data-entry="0" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">1.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Word after &quot;boy&quot; or &quot;chew&quot;</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box" data-entry="0" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="0" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="0" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="1" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">2.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Toto in &quot;The Wizard of Oz&quot;, eg.</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="1" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="1" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="2" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">3.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">A fox's unusual friend in a Disney movie</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="2" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="2" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="2" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="3" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">4.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Useful instinct for ranchers</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box circled" data-entry="3" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="3" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="3" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="4" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">5.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Fair</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box circled" data-entry="4" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="4" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="4" data-char="7" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="5" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">6.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Like Melanie Griffith's character in a 1988 movie</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box circled" data-entry="5" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="3" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="5" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="5" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="mr-entry" data-entry="6" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">7.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Opposite of #5</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="box-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="0" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="1" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="2" autocomplete="off" autocorrect="off" spellcheck="false"><span style="font-size:1.1rem;font-weight:700;color:#44403c;line-height:2rem;margin:0 1px">-</span><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="4" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box circled" data-entry="6" data-char="5" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="6" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="7" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="8" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="9" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="10" autocomplete="off" autocorrect="off" spellcheck="false"><input type="text" maxlength="1" class="letter-box" data-entry="6" data-char="11" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+    </div>
 
     <!-- Letter bank -->
     <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-5 mb-7">
@@ -231,83 +309,31 @@ const PUZZLE = {"entries":[{"word":"TOY","circlePositions":[2],"clue":"Word afte
 // ── State ──────────────────────────────────────────────────────────────────
 const state = {
   solved:           new Array(PUZZLE.entries.length).fill(false),
-  collectedLetters: [],   // shuffled letter tiles as they arrive
+  collectedLetters: [],
   score:            0,
   connectionSolved: false,
 };
 
-// ── Render entries ─────────────────────────────────────────────────────────
-const entriesEl = document.getElementById('entries');
-
+// ── Attach events to statically-rendered entries ───────────────────────────
 PUZZLE.entries.forEach((entry, ei) => {
-  const wrap = document.createElement('div');
-  wrap.className = 'bg-white rounded-xl border border-stone-200 shadow-sm p-5';
-  wrap.dataset.entry = ei;
+  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const boxes = [...wrap.querySelectorAll('.letter-box')];
 
-  // Header row
-  const header = document.createElement('div');
-  header.className = 'flex items-baseline gap-2 mb-3';
-  header.innerHTML =
-    '<span class="font-bold text-stone-400 text-sm min-w-[1.25rem]">' + (ei + 1) + '.</span>' +
-    '<span class="text-stone-800 text-sm leading-snug flex-1">' + esc(entry.clue) + '</span>' +
-    '<span class="text-xs text-stone-400 shrink-0">1 pt</span>' +
-    '<span class="check-mark hidden text-green-600 font-bold text-sm ml-1">&#10003;</span>';
-  wrap.appendChild(header);
-
-  // Box row
-  const boxRow = document.createElement('div');
-  boxRow.className = 'flex items-center gap-1 flex-wrap';
-  const circleSet = new Set(entry.circlePositions);
-
-  const boxes = [];
-  entry.word.split('').forEach((ch, ci) => {
-    const pos1 = ci + 1;
-    if (ch === '-') {
-      const hyp = document.createElement('span');
-      hyp.className = 'letter-hyphen';
-      hyp.textContent = '-';
-      boxRow.appendChild(hyp);
-    } else {
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.maxLength = 1;
-      inp.className = 'letter-box' + (circleSet.has(pos1) ? ' circled' : '');
-      inp.dataset.entry = ei;
-      inp.dataset.boxIndex = boxes.length;
-      inp.dataset.charIndex = ci;
-      inp.autocomplete = 'off';
-      inp.autocorrect = 'off';
-      inp.spellcheck = false;
-      boxRow.appendChild(inp);
-      boxes.push(inp);
-    }
-  });
-
-  wrap.appendChild(boxRow);
-  entriesEl.appendChild(wrap);
-
-  // Attach events
   boxes.forEach((inp, bi) => {
-    inp.addEventListener('keydown', e => handleKey(e, ei, bi, boxes));
-    inp.addEventListener('input', e => {
-      // Normalize: force uppercase, keep only alpha
+    inp.addEventListener('keydown', function(e) { handleKey(e, ei, bi, boxes); });
+    inp.addEventListener('input', function() {
       const v = inp.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(-1);
       inp.value = v;
       if (v) {
         if (bi + 1 < boxes.length) {
           boxes[bi + 1].focus();
         } else {
-          // Last box filled — check after a brief tick so the value is committed
-          setTimeout(() => checkEntry(ei, boxes), 10);
+          setTimeout(function() { checkEntry(ei, boxes); }, 10);
         }
       }
     });
   });
 });
-
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
 
 // ── Key handler ────────────────────────────────────────────────────────────
 function handleKey(e, ei, bi, boxes) {
@@ -366,8 +392,9 @@ function markCorrect(ei, boxes) {
   });
 
   // Show checkmark
-  const wrap = document.querySelector('[data-entry="' + ei + '"]');
-  wrap.querySelector('.check-mark')?.classList.remove('hidden');
+  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const cm = wrap.querySelector('.check-mark');
+  if (cm) cm.style.display = 'inline';
 
   // Collect circled letters
   // circlePositions are 1-based over the full word (including hyphens)
@@ -394,8 +421,8 @@ function markCorrect(ei, boxes) {
 }
 
 function markWrong(ei, boxes) {
-  const wrap = document.querySelector('[data-entry="' + ei + '"]');
-  const boxRow = wrap.querySelector('.flex.items-center');
+  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const boxRow = wrap.querySelector('.box-row');
   boxRow.classList.add('shake');
   setTimeout(() => {
     boxRow.classList.remove('shake');
