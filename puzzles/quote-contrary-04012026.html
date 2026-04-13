@@ -391,7 +391,8 @@
       hdr.className = 'flex items-start justify-between gap-2 mb-3';
 
       const conn = document.createElement('p');
-      conn.className = 'text-sm font-semibold text-gray-700 leading-snug';
+      conn.className = 'text-sm font-semibold text-gray-700 leading-snug hidden';
+      conn.id = 'conn-' + gIdx;
       conn.textContent = g.connection;
 
       const badge = document.createElement('span');
@@ -452,6 +453,7 @@
     const g     = GROUPS[gIdx];
 
     card.classList.add('solved');
+    document.getElementById('conn-' + gIdx)?.classList.remove('hidden');
 
     btns.forEach(btn => {
       btn.disabled = true;
