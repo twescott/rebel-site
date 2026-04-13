@@ -300,7 +300,9 @@
   let   toastTimer;
   const _wrongCounts  = new Array(GROUPS.length).fill(0);
   const _qcT0         = Date.now();
-  const hardSel       = new Array(GROUPS.length).fill(null);
+  const hardSel       = new Array(GROUPS.length).fill(null); // word selected per group
+  const slotAssign    = new Array(QUOTE_WORDS.length).fill(null); // {word,fromGroupIdx} per slot
+  let   selPoolGIdx   = null; // which pool chip is currently highlighted
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function shuffle(arr) {
@@ -333,7 +335,10 @@
       '<button id="btn-easy" data-mode="easy" class="mode-btn flex-1 py-2 text-sm font-semibold transition-colors">Easy</button>' +
       '<button id="btn-hard" data-mode="hard" class="mode-btn flex-1 py-2 text-sm font-semibold transition-colors border-l border-gray-200">Hard</button>';
     document.getElementById('groups-container').before(wrap);
-    wrap.addEventListener('click', e => { const m = e.target.closest('[data-mode]')?.dataset.mode; if (m) setMode(m); });
+    wrap.addEventListener('click', e => {
+      const m = e.target.closest('[data-mode]')?.dataset.mode;
+      if (m) setMode(m);
+    });
     updateModeUI();
   }
 
@@ -344,6 +349,16 @@
       b.classList.toggle('text-white', on);
       b.classList.toggle('text-gray-500', !on);
     });
+    if (mode === 'hard') {
+      renderPool();
+      updateAllSlots();
+    } else {
+      QUOTE_WORDS.forEach((entry, i) => {
+        if (!entry.given && !solved[entry.groupIdx]) resetSlotBlank(i);
+      });
+      const pool = document.getElementById('word-pool');
+      if (pool) pool.style.display = 'none';
+    }
     const cb = document.getElementById('hard-check-btn');
     if (cb) {
       cb.classList.toggle('hidden', mode !== 'hard');
@@ -357,9 +372,10 @@
     GROUPS.forEach((_, i) => {
       if (solved[i]) return;
       hardSel[i] = null;
-      clearTentativeSlot(i);
       document.querySelectorAll('#btns-' + i + ' .word-btn').forEach(b => b.classList.remove('selected'));
     });
+    slotAssign.fill(null);
+    selPoolGIdx = null;
     updateModeUI();
   }
 
@@ -374,51 +390,151 @@
 
       const word = document.createElement('span');
       word.className = 'q-word ' + (entry.given ? 'given' : 'blank');
-      word.textContent = entry.given ? entry.word : ' '.repeat(Math.max(entry.word.length, 2));
+      word.textContent = entry.given ? entry.word : '\u00a0\u00a0';
 
       const line = document.createElement('div');
       line.className = 'q-underline ' + (entry.given ? 'given' : 'blank');
 
       slot.appendChild(word);
       slot.appendChild(line);
+      if (!entry.given) slot.addEventListener('click', () => handleSlotClick(i));
       container.appendChild(slot);
+    });
+  }
+
+  function handleSlotClick(slotI) {
+    if (mode !== 'hard') return;
+    const entry = QUOTE_WORDS[slotI];
+    if (entry.given || solved[entry.groupIdx]) return;
+
+    const existing = slotAssign[slotI];
+
+    if (selPoolGIdx !== null) {
+      // Place the selected pool chip into this slot
+      // If something else is already here, return it to the pool first (it stays in hardSel)
+      if (existing) slotAssign[slotI] = null;
+      // Move chip from wherever it currently sits
+      const prevSlotI = slotAssign.findIndex(a => a?.fromGroupIdx === selPoolGIdx);
+      if (prevSlotI !== -1 && prevSlotI !== slotI) {
+        slotAssign[prevSlotI] = null;
+        resetSlotBlank(prevSlotI);
+      }
+      slotAssign[slotI] = { word: hardSel[selPoolGIdx], fromGroupIdx: selPoolGIdx };
+      selPoolGIdx = null;
+      updateSlot(slotI);
+      renderPool();
+      updateCheckBtn();
+    } else if (existing) {
+      // Click a filled slot with nothing selected → return to pool
+      slotAssign[slotI] = null;
+      resetSlotBlank(slotI);
+      renderPool();
+      updateCheckBtn();
+    }
+    // Click empty slot with nothing selected → no-op
+  }
+
+  function updateSlot(slotI) {
+    const entry = QUOTE_WORDS[slotI];
+    if (entry.given || solved[entry.groupIdx]) return;
+    const slot = document.getElementById('slot-' + slotI);
+    if (!slot) return;
+    const assign = slotAssign[slotI];
+    if (assign) {
+      slot.querySelector('.q-word').textContent    = assign.word;
+      slot.querySelector('.q-word').className      = 'q-word tentative';
+      slot.querySelector('.q-underline').className = 'q-underline tentative';
+      slot.style.cursor = 'pointer';
+    } else {
+      resetSlotBlank(slotI);
+    }
+  }
+
+  function resetSlotBlank(slotI) {
+    const slot = document.getElementById('slot-' + slotI);
+    if (!slot) return;
+    slot.querySelector('.q-word').textContent    = '\u00a0\u00a0';
+    slot.querySelector('.q-word').className      = 'q-word blank';
+    slot.querySelector('.q-underline').className = 'q-underline blank';
+    slot.style.cursor = mode === 'hard' ? 'pointer' : 'default';
+  }
+
+  function updateAllSlots() {
+    QUOTE_WORDS.forEach((entry, i) => {
+      if (!entry.given && !solved[entry.groupIdx]) updateSlot(i);
     });
   }
 
   function revealSlots(gIdx) {
     QUOTE_WORDS.forEach((entry, i) => {
       if (entry.given || entry.groupIdx !== gIdx) return;
+      slotAssign[i] = null;
       const slot = document.getElementById('slot-' + i);
-      slot.querySelector('.q-word').textContent   = entry.word;
-      slot.querySelector('.q-word').className     = 'q-word revealed';
+      if (!slot) return;
+      slot.querySelector('.q-word').textContent    = entry.word;
+      slot.querySelector('.q-word').className      = 'q-word revealed';
       slot.querySelector('.q-underline').className = 'q-underline revealed';
-    });
-  }
-
-  function setTentativeSlot(gIdx, word) {
-    QUOTE_WORDS.forEach((entry, i) => {
-      if (entry.given || entry.groupIdx !== gIdx) return;
-      const slot = document.getElementById('slot-' + i);
-      slot.querySelector('.q-word').textContent   = word;
-      slot.querySelector('.q-word').className     = 'q-word tentative';
-      slot.querySelector('.q-underline').className = 'q-underline tentative';
-    });
-  }
-
-  function clearTentativeSlot(gIdx) {
-    QUOTE_WORDS.forEach((entry, i) => {
-      if (entry.given || entry.groupIdx !== gIdx) return;
-      const slot = document.getElementById('slot-' + i);
-      const wEl  = slot.querySelector('.q-word');
-      if (wEl.classList.contains('revealed')) return;
-      wEl.textContent = ' '.repeat(Math.max(entry.word.length, 2));
-      wEl.className   = 'q-word blank';
-      slot.querySelector('.q-underline').className = 'q-underline blank';
+      slot.style.cursor = 'default';
     });
   }
 
   function updateProgress() {
     document.getElementById('progress-label').textContent = solvedCount + ' / ' + GROUPS.length + ' found';
+  }
+
+  // ── Word pool ──────────────────────────────────────────────────────────────
+  function injectPool() {
+    if (document.getElementById('word-pool')) return;
+    const poolCard = document.createElement('div');
+    poolCard.id = 'word-pool';
+    poolCard.style.cssText = 'background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:0.875rem 1rem;margin-bottom:0.75rem;display:none';
+    poolCard.innerHTML =
+      '<p style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:0.5rem">' +
+        'Word Pool — pick a word, then click a quote slot to place it' +
+      '</p>' +
+      '<div id="pool-chips" style="display:flex;flex-wrap:wrap;gap:0.5rem;min-height:2rem"></div>';
+    document.getElementById('groups-container').before(poolCard);
+  }
+
+  function renderPool() {
+    const poolCard = document.getElementById('word-pool');
+    const chips    = document.getElementById('pool-chips');
+    if (!poolCard || !chips) return;
+
+    if (mode !== 'hard') { poolCard.style.display = 'none'; return; }
+
+    chips.innerHTML = '';
+    let hasAny = false;
+
+    GROUPS.forEach((g, gIdx) => {
+      if (solved[gIdx] || !hardSel[gIdx]) return;
+      hasAny = true;
+      const isAssigned = slotAssign.some(a => a?.fromGroupIdx === gIdx);
+      const isSelected = selPoolGIdx === gIdx;
+
+      const chip = document.createElement('button');
+      chip.className = 'word-btn' + (isSelected ? ' selected' : '');
+      chip.style.opacity = isAssigned ? '0.35' : '1';
+      chip.textContent = hardSel[gIdx];
+      chip.disabled = isAssigned;
+
+      if (!isAssigned) {
+        chip.addEventListener('click', () => {
+          selPoolGIdx = (selPoolGIdx === gIdx) ? null : gIdx;
+          renderPool();
+          // Update blank slot cursors to hint they're clickable
+          QUOTE_WORDS.forEach((entry, i) => {
+            if (!entry.given && !solved[entry.groupIdx] && !slotAssign[i]) {
+              const sl = document.getElementById('slot-' + i);
+              if (sl) sl.style.cursor = selPoolGIdx !== null ? 'pointer' : 'default';
+            }
+          });
+        });
+      }
+      chips.appendChild(chip);
+    });
+
+    poolCard.style.display = hasAny ? 'block' : 'none';
   }
 
   // ── Group cards ────────────────────────────────────────────────────────────
@@ -488,9 +604,14 @@
   function updateCheckBtn() {
     const btn = document.getElementById('hard-check-btn');
     if (!btn) return;
-    const allPicked = GROUPS.every((_, i) => solved[i] || hardSel[i] !== null);
-    btn.disabled = !allPicked;
-    btn.classList.toggle('opacity-50', !allPicked);
+    const allReady = GROUPS.every((g, gIdx) => {
+      if (solved[gIdx]) return true;
+      if (!hardSel[gIdx]) return false;
+      const slotI = QUOTE_WORDS.findIndex(e => !e.given && e.groupIdx === gIdx);
+      return slotI !== -1 && slotAssign[slotI] !== null;
+    });
+    btn.disabled = !allReady;
+    btn.classList.toggle('opacity-50', !allReady);
   }
 
   // ── Easy mode: immediate feedback ─────────────────────────────────────────
@@ -506,37 +627,68 @@
     }
   }
 
-  // ── Hard mode: select → fill quote tentatively → check all at once ─────────
+  // ── Hard mode: select from group → pool → place in quote slot ─────────────
   function handleClickHard(gIdx, word) {
     if (solved[gIdx]) return;
+
+    // Changing selection: clear old word's slot assignment
+    if (hardSel[gIdx] && hardSel[gIdx] !== word) {
+      const prevSlotI = slotAssign.findIndex(a => a?.fromGroupIdx === gIdx);
+      if (prevSlotI !== -1) {
+        slotAssign[prevSlotI] = null;
+        resetSlotBlank(prevSlotI);
+      }
+      if (selPoolGIdx === gIdx) selPoolGIdx = null;
+    }
+
     hardSel[gIdx] = word;
     document.querySelectorAll('#btns-' + gIdx + ' .word-btn').forEach(b => {
       b.classList.toggle('selected', b.dataset.word === word);
     });
-    setTentativeSlot(gIdx, word);
+
+    renderPool();
     updateCheckBtn();
   }
 
   function doHardCheck() {
     let anyWrong = false;
+
     GROUPS.forEach((g, gIdx) => {
-      if (solved[gIdx] || !hardSel[gIdx]) return;
-      if (hardSel[gIdx] === g.contrary) {
+      if (solved[gIdx]) return;
+      const slotI  = QUOTE_WORDS.findIndex(e => !e.given && e.groupIdx === gIdx);
+      const assign = slotI !== -1 ? slotAssign[slotI] : null;
+
+      const correct =
+        hardSel[gIdx] === g.contrary &&
+        assign !== null &&
+        assign.fromGroupIdx === gIdx &&
+        assign.word === g.contrary;
+
+      if (correct) {
         solveGroup(gIdx);
       } else {
         anyWrong = true;
         _wrongCounts[gIdx]++;
-        T.track('qc_group_guess', { connection: g.connection, guessed: hardSel[gIdx], correct: false, attempt: _wrongCounts[gIdx] });
-        const sel = hardSel[gIdx];
-        const wrongBtn = [...document.querySelectorAll('#btns-' + gIdx + ' .word-btn')]
-          .find(b => b.dataset.word === sel);
+        T.track('qc_group_guess', { connection: g.connection, guessed: hardSel[gIdx] || '(none)', correct: false, attempt: _wrongCounts[gIdx] });
+
+        const selWord = hardSel[gIdx];
+        const wrongBtn = selWord
+          ? [...document.querySelectorAll('#btns-' + gIdx + ' .word-btn')].find(b => b.dataset.word === selWord)
+          : null;
         if (wrongBtn) wrongFlash(wrongBtn);
+
         hardSel[gIdx] = null;
-        clearTentativeSlot(gIdx);
+        if (slotI !== -1 && slotAssign[slotI]?.fromGroupIdx === gIdx) {
+          slotAssign[slotI] = null;
+          resetSlotBlank(slotI);
+        }
+        if (selPoolGIdx === gIdx) selPoolGIdx = null;
         document.querySelectorAll('#btns-' + gIdx + ' .word-btn').forEach(b => b.classList.remove('selected'));
       }
     });
+
     if (anyWrong) showToast('Some selections were wrong — try again');
+    renderPool();
     updateCheckBtn();
   }
 
@@ -559,6 +711,7 @@
     document.getElementById('reveal-' + gIdx).classList.remove('hidden');
     revealSlots(gIdx);
     updateProgress();
+    renderPool();
 
     T.track('qc_group_guess', { connection: g.connection, guessed: g.contrary, correct: true, wrong_attempts: _wrongCounts[gIdx] });
 
@@ -582,10 +735,10 @@
     comp.innerHTML =
       '<div class="completion-card">' +
         '<p class="font-serif text-xl md:text-2xl font-bold italic mb-2 leading-snug">' +
-          '&ldquo;A Fool and His Money Are Soon Parted&rdquo;' +
+          '\u201cA Fool and His Money Are Soon Parted\u201d' +
         '<\/p>' +
-        '<p class="text-sky-200 text-sm mb-4">&mdash; Proverb<\/p>' +
-        '<p class="text-lg font-semibold mb-1">🎉 Puzzle complete!<\/p>' +
+        '<p class="text-sky-200 text-sm mb-4">\u2014 Proverb<\/p>' +
+        '<p class="text-lg font-semibold mb-1">\uD83C\uDF89 Puzzle complete!<\/p>' +
         '<p class="text-sky-100 text-sm">Like this puzzle? Come play at Trivia Night!<\/p>' +
       '<\/div>';
   }
@@ -593,6 +746,7 @@
   // ── Init ───────────────────────────────────────────────────────────────────
   initModeToggle();
   buildQuote();
+  injectPool();
   buildGroups();
   injectCheckButton();
   updateProgress();
@@ -628,6 +782,5 @@
   }());
 
   T.track('qc_loaded', { puzzle: 'Quote Contrary 04012026' });
-  </script>
+</script>
 </body>
-</html>
