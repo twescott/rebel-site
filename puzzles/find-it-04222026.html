@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="https://rebel-the-dog.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find It! &bull; Rebel's Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e', light: '#fef2f2' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pop      { 0%,100%{transform:scale(1)}  50%{transform:scale(1.12)} }
+    @keyframes shake    { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+    @keyframes flip-out { from{transform:rotateX(0)}   to{transform:rotateX(-90deg)} }
+    @keyframes flip-in  { from{transform:rotateX(90deg)} to{transform:rotateX(0)} }
+
+    .tile {
+      width: clamp(40px, calc((100vw - 56px) / 6), 58px);
+      height: clamp(40px, calc((100vw - 56px) / 6), 58px);
+      border: 2px solid #d1d5db;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(1.1rem, 7vw, 1.8rem); font-weight: 700; text-transform: uppercase;
+      font-family: inherit; box-sizing: border-box;
+      transition: border-color .1s;
+    }
+    .tile.filled  { border-color: #9ca3af; animation: pop .1s ease; }
+    .tile.correct { background: #538d4e; border-color: #538d4e; color: #fff; }
+    .tile.present { background: #c47f17; border-color: #c47f17; color: #fff; }
+    .tile.absent  { background: #6c6c6c; border-color: #6c6c6c; color: #fff; }
+
+    .row.shake { animation: shake .4s ease; }
+
+    .key {
+      height: 58px; flex: 1; padding: 0 4px;
+      border: none; border-radius: 6px;
+      background: #d1d5db; color: #1f2937;
+      font-size: .8rem; font-weight: 700; text-transform: uppercase;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      user-select: none; transition: background .2s, color .2s; font-family: inherit;
+    }
+    .key:hover  { background: #9ca3af; }
+    .key.correct{ background: #538d4e; color: #fff; }
+    .key.present{ background: #c47f17; color: #fff; }
+    .key.absent { background: #6c6c6c; color: #fff; }
+    .key.wide   { flex: 1.5; font-size: .72rem; }
+
+    #toast {
+      position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: #fff; padding: 10px 20px;
+      border-radius: 8px; font-size: .875rem; font-weight: 500;
+      opacity: 0; transition: opacity .2s; z-index: 200; pointer-events: none;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    #keyboard { width: 100%; }
+  </style>
+</head>
+<body class="bg-sky-50 text-stone-900 font-sans antialiased">
+
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-sm font-medium">
+        <a href="" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="max-w-lg mx-auto px-4 py-10 text-center">
+      <h1 class="font-serif text-4xl font-bold mb-1">Find It!</h1>
+      <p class="text-stone-500 text-sm mb-8">Guess the 5-letter word &mdash; 6 tries</p>
+
+      <div id="grid" class="flex flex-col gap-1.5 items-center mb-8"></div>
+      <div id="keyboard" class="flex flex-col gap-1.5"></div>
+    </div>
+  </main>
+
+  <div id="toast"></div>
+
+  
+  <!-- ── Feedback ────────────────────────────────────────────────────────── -->
+  <style>
+  .fb-chip{cursor:pointer;display:inline-flex;align-items:center;padding:.375rem .875rem;border:1.5px solid #d6d3d1;border-radius:9999px;font-size:.875rem;color:#57534e;transition:all .15s;user-select:none}
+  .fb-chip:has(input:checked){border-color:#1e3a5f;background:#1e3a5f;color:#fff}
+  .fb-chip:hover:not(:has(input:checked)){border-color:#1e3a5f;color:#1e3a5f}
+  </style>
+  <section id="puzzle-feedback" class="max-w-2xl mx-auto px-5 py-8 mt-2 border-t border-stone-200">
+    <h2 class="font-serif text-lg font-bold text-stone-800 mb-4">How&rsquo;d we do?</h2>
+    <form id="fb-form" action="https://formspree.io/f/__FORMSPREE_ID__" method="POST">
+      <input type="hidden" name="puzzle" value="Find It! 4/22/2026">
+      <input type="hidden" name="_subject" value="Puzzle Feedback: Find It! 4/22/2026">
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">Like this puzzle?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="liked" value="Yes" class="sr-only"><span>&#x1F44D; Yes</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="Meh" class="sr-only"><span>&#x1F937; Meh</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="No"  class="sr-only"><span>&#x1F44E; No</span></label>
+        </div>
+      </div>
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">How was the difficulty?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Easy"   class="sr-only"><span>Too Easy</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Just Right" class="sr-only"><span>Just Right</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Hard"   class="sr-only"><span>Too Hard</span></label>
+        </div>
+      </div>
+      <div id="fb-comment-wrap" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+        <div class="pb-4">
+          <textarea name="comment" placeholder="Anything else to add? (optional)" rows="3"
+            class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"></textarea>
+          <button type="submit"
+            class="mt-2 px-5 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#162d4a] transition-colors">
+            Send feedback
+          </button>
+        </div>
+      </div>
+      <p id="fb-thanks" class="hidden text-sm text-green-700 font-medium mt-2">Thanks for the feedback! &#x1F43E;</p>
+    </form>
+    <p class="text-xs text-stone-400 mt-4">Like the puzzle? Buy Rebel&rsquo;s Dad or Rebel a drink or Pup Cup. Find a mistake? Rebel&rsquo;s Dad will buy you a drink (but Rebel would still prefer a Pup Cup).</p>
+  </section>
+  <script>
+  (function(){
+    var wrap = document.getElementById('fb-comment-wrap');
+    var opened = false;
+    function openForm(){
+      if(opened) return;
+      opened = true;
+      wrap.style.maxHeight = '300px';
+    }
+    document.querySelectorAll('#fb-form input[type="radio"]').forEach(function(r){
+      r.addEventListener('change', openForm);
+    });
+    var form = document.getElementById('fb-form');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      fetch(form.action, {method:'POST', body: new FormData(form), headers:{Accept:'application/json'}})
+        .then(function(){
+          document.getElementById('fb-thanks').classList.remove('hidden');
+          form.querySelector('button[type="submit"]').disabled = true;
+        })
+        .catch(function(){});
+    });
+  }());
+  </script>
+
+  <footer class="bg-[#1e3a5f] mt-16">
+    <div class="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
+        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const ANSWER      = atob('RUFSVEg='); // EARTH
+    const MAX_GUESSES = 6;
+    const WORD_LEN    = 5;
+
+    let currentRow = 0, currentCol = 0;
+    let currentGuess = [];
+    let gameOver = false;
+    const guesses  = [];
+    const keyState = {};
+
+    // ── Build grid ────────────────────────────────────────────────────────
+    function buildGrid() {
+      const grid = document.getElementById('grid');
+      for (let r = 0; r < MAX_GUESSES; r++) {
+        const row = document.createElement('div');
+        row.className = 'row flex gap-1.5';
+        row.id = 'row-' + r;
+        for (let c = 0; c < WORD_LEN; c++) {
+          const t = document.createElement('div');
+          t.className = 'tile';
+          t.id = 'tile-' + r + '-' + c;
+          row.appendChild(t);
+        }
+        grid.appendChild(row);
+      }
+    }
+
+    // ── Build keyboard ────────────────────────────────────────────────────
+    function buildKeyboard() {
+      const ROWS = [
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['Enter','Z','X','C','V','B','N','M','\u232b']
+      ];
+      const kb = document.getElementById('keyboard');
+      ROWS.forEach(keys => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'flex gap-1.5 w-full';
+        keys.forEach(k => {
+          const btn = document.createElement('button');
+          btn.textContent = k;
+          btn.dataset.key = k;
+          btn.className = 'key' + (k === 'Enter' || k === '\u232b' ? ' wide' : '');
+          btn.addEventListener('click', () => handleKey(k));
+          rowEl.appendChild(btn);
+        });
+        kb.appendChild(rowEl);
+      });
+    }
+
+    const getTile = (r, c) => document.getElementById('tile-' + r + '-' + c);
+
+    // ── Input ─────────────────────────────────────────────────────────────
+    function handleKey(key) {
+      if (gameOver) return;
+      if (key === '\u232b' || key === 'Backspace') deleteLetter();
+      else if (key === 'Enter')                    submitGuess();
+      else if (/^[A-Za-z]$/.test(key))            addLetter(key.toUpperCase());
+    }
+
+    function addLetter(letter) {
+      if (currentCol >= WORD_LEN) return;
+      const t = getTile(currentRow, currentCol);
+      t.textContent = letter;
+      t.classList.add('filled');
+      currentGuess.push(letter);
+      currentCol++;
+    }
+
+    function deleteLetter() {
+      if (currentCol <= 0) return;
+      currentCol--;
+      currentGuess.pop();
+      const t = getTile(currentRow, currentCol);
+      t.textContent = '';
+      t.classList.remove('filled');
+    }
+
+    // ── Evaluate ──────────────────────────────────────────────────────────
+    function evaluate(guess) {
+      const result = Array(WORD_LEN).fill('absent');
+      const ans    = ANSWER.split('');
+      // Pass 1: correct positions
+      guess.split('').forEach((ch, i) => {
+        if (ch === ans[i]) { result[i] = 'correct'; ans[i] = null; }
+      });
+      // Pass 2: present elsewhere
+      guess.split('').forEach((ch, i) => {
+        if (result[i] === 'correct') return;
+        const idx = ans.indexOf(ch);
+        if (idx !== -1) { result[i] = 'present'; ans[idx] = null; }
+      });
+      return result;
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────
+    function submitGuess() {
+      if (currentCol < WORD_LEN) {
+        document.getElementById('row-' + currentRow).classList.remove('shake');
+        void document.getElementById('row-' + currentRow).offsetWidth;
+        document.getElementById('row-' + currentRow).classList.add('shake');
+        showToast('Not enough letters');
+        return;
+      }
+
+      const guess  = currentGuess.join('');
+      const result = evaluate(guess);
+
+      // Flip tiles with staggered delay
+      result.forEach((state, i) => {
+        const t = getTile(currentRow, i);
+        setTimeout(() => {
+          t.style.animation = 'flip-out .15s ease forwards';
+          setTimeout(() => {
+            t.classList.remove('filled');
+            t.classList.add(state);
+            t.style.animation = 'flip-in .15s ease forwards';
+          }, 150);
+        }, i * 80);
+      });
+
+      setTimeout(() => {
+        // Update key colour states (priority: correct > present > absent)
+        const pri = { correct: 3, present: 2, absent: 1 };
+        result.forEach((state, i) => {
+          const ch = guess[i];
+          if ((pri[state] || 0) > (pri[keyState[ch]] || 0)) keyState[ch] = state;
+        });
+        updateKeyboard();
+
+        guesses.push(guess);
+        currentRow++;
+        currentCol = 0;
+        currentGuess = [];
+
+        const won = result.every(s => s === 'correct');
+          T.track('findit_guess', { attempt: currentRow + 1, correct: won });
+          if (won) T.track('findit_complete', { attempts: currentRow + 1, won: true });
+          else if (currentRow + 1 >= MAX_GUESSES) T.track('findit_complete', { attempts: currentRow + 1, won: false });
+        if (won) {
+          gameOver = true;
+          const msgs = ['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'];
+          showToast(msgs[currentRow - 1] || 'Nice!', 3000);
+        } else if (currentRow >= MAX_GUESSES) {
+          gameOver = true;
+          showToast(ANSWER, 4000);
+        }
+      }, WORD_LEN * 80 + 300);
+    }
+
+    function updateKeyboard() {
+      document.querySelectorAll('[data-key]').forEach(btn => {
+        const s = keyState[btn.dataset.key];
+        if (s) btn.className = 'key' + (btn.dataset.key === 'Enter' || btn.dataset.key === '\u232b' ? ' wide' : '') + ' ' + s;
+      });
+    }
+
+    let toastTimer;
+    function showToast(msg, duration = 1500) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+    }
+
+    // ── Physical keyboard ─────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      handleKey(e.key);
+    });
+
+    buildGrid();
+    buildKeyboard();
+      T.track('findit_loaded', { word_len: WORD_LEN });
+  
+
+  // ── Telemetry ──────────────────────────────────────────────────────────────
+  const T = (function () {
+    const KEY  = '__POSTHOG_KEY__'; // replace with phc_... from PostHog project settings
+    const HOST = 'https://us.i.posthog.com';
+    function uid() {
+      try {
+        let v = localStorage.getItem('_ruid');
+        if (!v) {
+          v = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now().toString(36) + Math.random().toString(36).slice(2);
+          localStorage.setItem('_ruid', v);
+        }
+        return v;
+      } catch (e) { return 'anon'; }
+    }
+    return {
+      track: function (event, props) {
+        if (!KEY || KEY === '__POSTHOG_KEY__') return; // no-op until key is set
+        try {
+          const payload = JSON.stringify({
+            api_key: KEY, event: event, distinct_id: uid(),
+            properties: Object.assign({}, props, { $current_url: location.href }),
+          });
+          if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
+        } catch (e) {}
+      },
+    };
+  }());
+
+  </script>
+</body>
+</html>
