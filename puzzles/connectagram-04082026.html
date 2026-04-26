@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="https://rebel-the-dog.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connectagram &bull; Rebel's Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e', light: '#fef2f2' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="alternate" type="application/rss+xml" title="Rebel's Blog" href="feed.xml">
+  <style>
+    /* Word input */
+    .word-input:focus {
+      border-bottom-color: #ca8a04;
+      background: #fefce8;
+    }
+    .word-input:disabled {
+      pointer-events: none;
+    }
+    /* Shake animation for wrong answers */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-6px); }
+      40%     { transform: translateX(6px); }
+      60%     { transform: translateX(-4px); }
+      80%     { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.35s ease; }
+
+    /* Letter bank tiles */
+    .letter-tile {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      border: 2px solid #15803d;
+      background: #bbf7d0;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #14532d;
+      animation: pop-in 0.2s ease;
+    }
+    @keyframes pop-in {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    /* Connection word-length dots */
+    .conn-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-bottom: 2px solid #57534e;
+    }
+  </style>
+</head>
+<body class="bg-sky-50 text-stone-900 font-sans antialiased">
+
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+        <a href="" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="hidden sm:block px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="bg-[#1e3a5f] py-10 px-5">
+    <div class="max-w-2xl mx-auto">
+      <p class="text-sky-300 text-xs tracking-[0.15em] uppercase mb-2 font-medium">
+        <a href="puzzles.html" class="hover:text-white transition-colors">&larr; All Puzzles</a>
+      </p>
+      <h1 class="font-serif text-4xl font-bold text-white">Connectagram</h1>
+      <p class="text-sky-300 mt-1 text-sm">April 8, 2026</p>
+    </div>
+  </div>
+
+  <main class="max-w-2xl mx-auto px-5 py-8">
+
+    <!-- Instructions -->
+    <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-5 mb-7 text-sm text-stone-700 leading-relaxed">
+      <p>Fill in each answer using the clue. Some letters are
+        <span class="inline-flex items-center justify-center w-6 h-6 border-2 border-stone-600 rounded-full font-bold text-xs">○</span>
+        circled. Collect all the circled letters from every correct answer and unscramble them to reveal what all the answers have in common.</p>
+      <p class="mt-2"><strong>1 point</strong> per correct answer &bull; <strong>5 points</strong> for finding the connection.</p>
+      
+      <div class="mt-3 text-sm text-stone-500">
+        Hints from this week's puzzles:
+        <a href="https://rebel-the-dog.com/puzzles/crossword-04082026.html" class="text-[#1e3a5f] underline hover:text-[#9b2226]">Crossword</a>
+         &bull; 
+        <a href="https://rebel-the-dog.com/puzzles/find-it-04082026.html" class="text-[#1e3a5f] underline hover:text-[#9b2226]">Find It!</a>
+      </div>
+    </div>
+
+    <!-- Entries (statically generated) -->
+    <div id="entries" style="display:flex;flex-direction:column;gap:1.25rem;margin-bottom:2rem">
+
+    <div class="mr-entry" data-entry="0" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">1.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Word after &quot;boy&quot; or &quot;chew&quot;</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
+      </div>
+      <input type="text" class="word-input" data-entry="0" data-letters="TOY"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="1" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">2.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Toto in &quot;The Wizard of Oz&quot;, eg.</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
+      </div>
+      <input type="text" class="word-input" data-entry="1" data-letters="TERRIER"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="2" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">3.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">A fox's unusual friend in a Disney movie</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
+      </div>
+      <input type="text" class="word-input" data-entry="2" data-letters="HOUND"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="3" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">4.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Useful instinct for ranchers</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
+      </div>
+      <input type="text" class="word-input" data-entry="3" data-letters="HERDING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="4" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">5.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Fair</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span>
+      </div>
+      <input type="text" class="word-input" data-entry="4" data-letters="SPORTING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="5" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">6.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Like Melanie Griffith's character in a 1988 movie</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span>
+      </div>
+      <input type="text" class="word-input" data-entry="5" data-letters="WORKING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+
+    <div class="mr-entry" data-entry="6" style="background:white;border-radius:12px;border:1px solid #e7e5e4;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:0">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+        <span style="font-weight:700;color:#a8a29e;font-size:.875rem;min-width:1.25rem">7.</span>
+        <span class="mr-clue" style="color:#292524;font-size:.875rem;line-height:1.4;flex:1">Opposite of #5</span>
+        <span style="font-size:.75rem;color:#a8a29e;white-space:nowrap">1 pt</span>
+        <span class="check-mark" style="display:none;color:#16a34a;font-weight:700;font-size:.875rem;margin-left:4px">&#10003;</span>
+      </div>
+      <div class="slot-row" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span style="font-weight:700;color:#57534e;font-size:1rem;line-height:1.75rem;margin:0 1px">-</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot circled" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #44403c;border-radius:50%;font-weight:700;font-size:.875rem;color:transparent">○</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span><span class="mr-slot" style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #44403c;font-weight:700;font-size:.875rem;color:transparent">_</span>
+      </div>
+      <input type="text" class="word-input" data-entry="6" data-letters="NONSPORTING"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+        placeholder="_ _ _ _ _ _ _ _ _ _ _"
+        style="width:100%;border:none;border-bottom:2px solid #44403c;outline:none;padding:4px 2px;font-size:1rem;font-weight:700;font-family:Inter,sans-serif;text-transform:uppercase;background:transparent;color:#1c1917;letter-spacing:0.1em">
+    </div>
+    </div>
+
+    <!-- Letter bank -->
+    <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-5 mb-7">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold text-stone-700 text-sm uppercase tracking-wide">Collected Letters</h2>
+        <span id="bank-count" class="text-xs text-stone-400">0 of 13 collected</span>
+      </div>
+      <div id="letter-bank" class="flex flex-wrap gap-2 min-h-[2.5rem]">
+        <span class="text-stone-300 text-sm italic self-center">Solve entries to collect letters&hellip;</span>
+      </div>
+    </div>
+
+    <!-- Connection -->
+    <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-5 mb-7">
+      <h2 class="font-semibold text-stone-700 text-sm uppercase tracking-wide mb-1">The Connection <span class="text-stone-400 font-normal normal-case tracking-normal">(5 points)</span></h2>
+      <p class="text-xs text-stone-400 mb-4">Unscramble the circled letters. 3 + 4 + 6 letters.</p>
+
+      <!-- Word-length hint -->
+      <div id="conn-blanks" class="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4"></div>
+
+      <!-- Input row -->
+      <div id="conn-input-row" class="flex gap-2 flex-wrap items-center">
+        <input id="conn-input" type="text" placeholder="Type your answer&hellip;"
+          class="flex-1 min-w-0 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] uppercase tracking-widest"
+          autocomplete="off" autocorrect="off" spellcheck="false">
+        <button id="check-btn"
+          class="px-4 py-2 rounded-lg bg-[#1e3a5f] text-white text-sm font-medium hover:bg-[#162d4a] transition-colors">
+          Check
+        </button>
+      </div>
+
+      <!-- Result banner -->
+      <div id="conn-result" class="hidden mt-3 rounded-lg px-4 py-3 text-sm font-medium"></div>
+    </div>
+
+    <!-- Score -->
+    <div class="text-center">
+      <div class="inline-flex items-center gap-3 bg-white rounded-full border border-stone-200 shadow-sm px-6 py-3">
+        <span class="text-stone-500 text-sm">Score</span>
+        <span id="score-display" class="font-serif text-2xl font-bold text-[#1e3a5f]">0</span>
+        <span class="text-stone-400 text-sm">/ 12</span>
+      </div>
+    </div>
+
+    <!-- All-done banner (hidden until complete) -->
+    <div id="done-banner" class="hidden mt-6 bg-[#1e3a5f] text-white rounded-xl p-6 text-center">
+      <div class="font-serif text-2xl font-bold mb-1">Puzzle Complete!</div>
+      <div id="done-score" class="text-sky-200 text-sm"></div>
+    </div>
+
+  </main>
+
+  <footer class="bg-[#1e3a5f] mt-16">
+    <div class="max-w-2xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
+      <div class="flex items-center gap-4 text-sm">
+        <span class="text-sky-400 text-xs">Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="underline hover:text-white">CC BY-SA 4.0</a></span>
+        <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
+        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+const PUZZLE = {"entries":[{"word":"TOY","circlePositions":[2],"clue":"Word after \"boy\" or \"chew\""},{"word":"TERRIER","circlePositions":[3],"clue":"Toto in \"The Wizard of Oz\", eg."},{"word":"HOUND","circlePositions":[2,3],"clue":"A fox's unusual friend in a Disney movie"},{"word":"HERDING","circlePositions":[1,4],"clue":"Useful instinct for ranchers"},{"word":"SPORTING","circlePositions":[1,8],"clue":"Fair"},{"word":"WORKING","circlePositions":[1,7],"clue":"Like Melanie Griffith's character in a 1988 movie"},{"word":"NON-SPORTING","circlePositions":[2,5,6],"clue":"Opposite of #5"}],"finalAnswer":"DOG SHOW GROUPS","words":["DOG","SHOW","GROUPS"],"totalCircled":13,"maxScore":12};
+
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
+  solved:           new Array(PUZZLE.entries.length).fill(false),
+  collectedLetters: [],
+  score:            0,
+  connectionSolved: false,
+};
+
+// ── Attach events to statically-rendered entries ───────────────────────────
+PUZZLE.entries.forEach((entry, ei) => {
+  const wrap  = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const input = wrap.querySelector('.word-input');
+  const expected = input.dataset.letters; // letters without hyphens
+
+  input.addEventListener('keydown', function(e) {
+    if (state.solved[ei]) { e.preventDefault(); return; }
+    if (e.key === 'Enter') { e.preventDefault(); trySubmit(ei, input, expected); }
+  });
+  input.addEventListener('input', function() {
+    if (state.solved[ei]) return;
+    // Force uppercase letters only
+    const v = input.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    input.value = v;
+    // Auto-check when length matches the answer
+    if (v.length === expected.length) {
+      setTimeout(function() { trySubmit(ei, input, expected); }, 30);
+    }
+  });
+});
+
+// ── Entry validation ───────────────────────────────────────────────────────
+function trySubmit(ei, input, expected) {
+  if (state.solved[ei]) return;
+  const typed = input.value.replace(/[^A-Z]/g, '');
+  if (typed.length < expected.length) return;
+  if (typed === expected) {
+    markCorrect(ei, input);
+  } else {
+    markWrong(ei, input);
+  }
+}
+
+function markCorrect(ei, input) {
+  state.solved[ei] = true;
+  const entry = PUZZLE.entries[ei];
+  const wordLetters = entry.word.split('').filter(c => c !== '-');
+
+  // Hide input, show filled slot row with actual letters
+  input.style.display = 'none';
+  const wrap = document.querySelector('[data-entry="' + ei + '"].mr-entry');
+  const slotRow = wrap.querySelector('.slot-row');
+  const circleSet = new Set(entry.circlePositions);
+  let li = 0;
+  slotRow.innerHTML = entry.word.split('').map((ch, ci) => {
+    if (ch === '-') return '<span style="font-weight:700;color:#57534e;font-size:1rem;line-height:1.75rem;margin:0 1px">-</span>';
+    const isCircled = circleSet.has(ci + 1);
+    const letter = wordLetters[li++];
+    return isCircled
+      ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border:2px solid #15803d;border-radius:50%;background:#bbf7d0;font-weight:700;font-size:.875rem;color:#14532d">' + letter + '</span>'
+      : '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-bottom:2px solid #16a34a;font-weight:700;font-size:.875rem;color:#15803d">' + letter + '</span>';
+  }).join('');
+
+  // Show checkmark
+  const cm = wrap.querySelector('.check-mark');
+  if (cm) cm.style.display = 'inline';
+
+  // Collect circled letters into the pool
+  const newLetters = [];
+  let bi = 0;
+  entry.word.split('').forEach((ch, ci) => {
+    if (ch === '-') return;
+    if (circleSet.has(ci + 1)) newLetters.push(wordLetters[bi]);
+    bi++;
+  });
+  state.collectedLetters.push(...newLetters.sort(() => Math.random() - 0.5));
+
+  state.score += 1;
+  updateScore();
+  updateLetterBank();
+  checkAllDone();
+}
+
+function markWrong(ei, input) {
+  input.classList.add('shake');
+  input.style.borderBottomColor = '#dc2626';
+  setTimeout(function() {
+    input.classList.remove('shake');
+    input.style.borderBottomColor = '#44403c';
+    input.value = '';
+    input.focus();
+  }, 350);
+}
+
+// ── Letter bank ────────────────────────────────────────────────────────────
+function updateLetterBank() {
+  const bank = document.getElementById('letter-bank');
+  const count = document.getElementById('bank-count');
+  bank.innerHTML = '';
+
+  if (state.collectedLetters.length === 0) {
+    bank.innerHTML = '<span class="text-stone-300 text-sm italic self-center">Solve entries to collect letters&hellip;</span>';
+  } else {
+    state.collectedLetters.forEach(ch => {
+      const tile = document.createElement('span');
+      tile.className = 'letter-tile';
+      tile.textContent = ch;
+      bank.appendChild(tile);
+    });
+  }
+
+  count.textContent = state.collectedLetters.length + ' of ' + PUZZLE.totalCircled + ' collected';
+}
+
+// ── Connection section ─────────────────────────────────────────────────────
+(function renderConnectionBlanks() {
+  const el = document.getElementById('conn-blanks');
+  PUZZLE.words.forEach((word, wi) => {
+    if (wi > 0) {
+      const sp = document.createElement('span');
+      sp.className = 'text-stone-300 text-lg font-light';
+      sp.textContent = '/';
+      el.appendChild(sp);
+    }
+    const grp = document.createElement('span');
+    grp.className = 'inline-flex gap-1';
+    word.split('').forEach(() => {
+      const dot = document.createElement('span');
+      dot.className = 'conn-dot';
+      grp.appendChild(dot);
+    });
+    el.appendChild(grp);
+  });
+})();
+
+document.getElementById('check-btn').addEventListener('click', checkConnection);
+document.getElementById('conn-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkConnection();
+});
+
+function checkConnection() {
+  if (state.connectionSolved) return;
+  const input = document.getElementById('conn-input');
+  const guess = input.value.trim().toUpperCase().replace(/\s+/g, ' ');
+  const result = document.getElementById('conn-result');
+
+  if (!guess) return;
+
+  if (guess === PUZZLE.finalAnswer) {
+    state.connectionSolved = true;
+    state.score += 5;
+    updateScore();
+
+    input.disabled = true;
+    document.getElementById('check-btn').disabled = true;
+    document.getElementById('check-btn').classList.add('opacity-50');
+
+    // Fill in the blanks with the answer
+    const blanksEl = document.getElementById('conn-blanks');
+    blanksEl.innerHTML = '';
+    PUZZLE.words.forEach((word, wi) => {
+      if (wi > 0) {
+        const sp = document.createElement('span');
+        sp.className = 'text-stone-400 text-lg font-light';
+        sp.textContent = '/';
+        blanksEl.appendChild(sp);
+      }
+      const grp = document.createElement('span');
+      grp.className = 'inline-flex gap-1';
+      word.split('').forEach(ch => {
+        const dot = document.createElement('span');
+        dot.className = 'conn-dot font-bold text-green-700 text-sm';
+        dot.style.borderColor = '#16a34a';
+        dot.textContent = ch;
+        grp.appendChild(dot);
+      });
+      blanksEl.appendChild(grp);
+    });
+
+    result.className = 'mt-3 rounded-lg px-4 py-3 text-sm font-medium bg-green-50 text-green-800 border border-green-200';
+    result.textContent = '✓ That's it! +5 points';
+    result.classList.remove('hidden');
+
+    checkAllDone();
+  } else {
+    result.className = 'mt-3 rounded-lg px-4 py-3 text-sm font-medium bg-red-50 text-red-700 border border-red-200 shake';
+    result.textContent = 'Not quite — keep unscrambling!';
+    result.classList.remove('hidden');
+    setTimeout(() => result.classList.remove('shake'), 400);
+  }
+}
+
+// ── Score & completion ─────────────────────────────────────────────────────
+function updateScore() {
+  document.getElementById('score-display').textContent = state.score;
+}
+
+function checkAllDone() {
+  const allEntriesSolved = state.solved.every(Boolean);
+  const done = allEntriesSolved && state.connectionSolved;
+  if (!done) return;
+
+  const banner = document.getElementById('done-banner');
+  const subtitle = document.getElementById('done-score');
+  banner.classList.remove('hidden');
+  subtitle.textContent = state.score + ' out of ' + PUZZLE.maxScore + ' points';
+
+  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>
