@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <base href="https://rebel-the-dog.com/">
+  <title>Center of Attention &bull; Rebel's Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#1e3a5f',
+            'navy-dark': '#16304f',
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --cell-size: clamp(20px, 5.5vw, 40px);
+      --cell-font: clamp(10px, 2.8vw, 20px);
+      --num-font: clamp(5px, 1.3vw, 9px);
+    }
+
+    body { font-family: 'Inter', sans-serif; }
+
+    .xw-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(15, var(--cell-size));
+      grid-template-rows: repeat(15, var(--cell-size));
+      border: 2px solid #000000;
+      gap: 0;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .xw-cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: 1px solid #9ca3af;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .xw-cell.black {
+      background: #000000;
+      border-color: #000000;
+      cursor: default;
+    }
+
+    .xw-cell.white { background: #ffffff; }
+    .xw-cell.shaded { background: #d4d4d4; }
+    .xw-cell.selected { background: #93c5fd !important; }
+    .xw-cell.word-highlight { background: #dbeafe !important; }
+    .xw-menu-item { display: block; width: 100%; text-align: left; padding: 0.4rem 0.75rem; font-size: 0.875rem; color: #1c1917; }
+    .xw-menu-item:hover { background: #f3f4f6; }
+    #autocheck-btn[data-on="1"]:hover { background: #162d4a; }
+    #rebus-btn[data-on="1"]:hover { background: #162d4a; }
+    .xw-cell.correct .cell-letter { color: #16a34a; font-weight: 700; }
+    .xw-cell.incorrect .cell-letter { color: #dc2626; font-weight: 700; }
+    .xw-cell.revealed .cell-letter { color: #2563eb; }
+    .cell-letter.rebus { font-size: clamp(5px, 1.6vw, 11px); letter-spacing: -0.03em; }
+
+    .xw-cell .cell-number {
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      font-size: var(--num-font);
+      line-height: 1;
+      color: #374151;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .xw-cell .cell-letter {
+      font-size: var(--cell-font);
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      color: #111827;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    .clue-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      transition: background 0.1s;
+    }
+    .clue-item:hover { background: #f3f4f6; }
+    .clue-item.active-clue { background: #dbeafe; font-weight: 600; }
+    .clue-item .clue-num { font-weight: 700; margin-right: 4px; color: #1e3a5f; }
+
+    #active-clue-bar {
+      background: #1e3a5f;
+      color: white;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e3a5f;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+      font-family: 'Playfair Display', serif;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── Mobile: full-viewport NYT-style layout ─────────────── */
+    @media (max-width: 899px) {
+      body { height: 100svh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+      header { display: none !important; }
+      footer { display: none !important; }
+      #puzzle-feedback { display: none !important; }
+      main { flex: 1; min-height: 0; display: flex; flex-direction: column; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+      #active-clue-bar { display: none !important; }
+      #toolbar-bar     { display: none !important; }
+      #clue-panels     { display: none !important; }
+      #mob-clue-nav    { position: static; flex-shrink: 0; display: flex; margin: 0; order: 2; }
+      #grid-layout     { flex: 1; min-height: 0; order: 1; }
+      #grid-viewport   { width: 100%; height: 100%; overflow: hidden; position: relative; background: #fff; touch-action: none; }
+      .xw-grid { position: absolute; top: 0; left: 0; transform-origin: 0 0; transition: transform 0.2s ease; }
+      :root { --cell-size: 40px; --cell-font: 20px; --num-font: 9px; }
+      #mob-kb { position: static !important; display: flex; }
+    }
+    @media (min-width: 900px) {
+      #mob-clue-nav      { display: none; }
+      #mob-kb            { display: none; }
+      #mob-toolbar-strip { display: none; }
+    }
+
+    /* Mobile clue nav */
+    #mob-clue-nav {
+      position: sticky;
+      top: 56px;
+      z-index: 40;
+      background: #1e3a5f;
+      color: white;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 8px;
+      margin: 0 -1rem 12px;
+    }
+    #mob-clue-text {
+      flex: 1;
+      font-size: 0.8rem;
+      line-height: 1.3;
+      text-align: left;
+      padding: 0 4px;
+      min-width: 0;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mob-nav-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.4rem;
+      line-height: 1;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .mob-nav-btn:active { background: #162d4a; }
+    .mob-clues-btn {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid #93c5fd;
+      border-radius: 4px;
+      background: none;
+      color: white;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .mob-clues-btn:active { background: #162d4a; }
+
+    /* Mobile keyboard */
+    #mob-kb {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #d1d5db;
+      padding: 6px 4px env(safe-area-inset-bottom, 8px);
+      flex-direction: column;
+      gap: 5px;
+      z-index: 100;
+    }
+    .mob-kb-row {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .mob-key {
+      flex: 1;
+      height: 44px;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #111827;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .mob-key:active { background: #b0b7bf; transform: scale(0.95); }
+    .mob-key.wide { flex: 1.6; font-size: 0.72rem; }
+
+    /* Clue drawer */
+    #clue-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: none;
+    }
+    #clue-drawer.open { display: block; }
+    #clue-drawer-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+    }
+    #clue-drawer-sheet {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      max-height: 75vh;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+    }
+    #clue-drawer-sheet .clue-item { font-size: 0.8rem; }
+
+    /* Mobile toolbar strip */
+    #mob-toolbar-strip {
+      display: flex;
+      gap: 4px;
+      padding: 4px 8px;
+      background: #e5e7eb;
+      border-bottom: 1px solid #9ca3af;
+      flex-shrink: 0;
+    }
+    .mob-tool-btn {
+      flex: 1;
+      height: 32px;
+      background: #fff;
+      border: 1px solid #9ca3af;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mob-tool-btn:active { background: #dbeafe; }
+    .mob-tool-btn.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+    .mob-drop-wrap { position: relative; flex: 1; display: flex; }
+    .mob-drop-wrap .mob-tool-btn { flex: 1; }
+    .mob-drop-menu {
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 0;
+      background: #fff;
+      border: 1px solid #9ca3af;
+      border-radius: 6px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.18);
+      min-width: 80px;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .mob-drop-item {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #1e3a5f;
+      touch-action: manipulation;
+    }
+    .mob-drop-item + .mob-drop-item { border-top: 1px solid #e5e7eb; }
+    .mob-drop-item:active { background: #dbeafe; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navigation -->
+  <nav class="bg-[#1e3a5f] shadow-lg" style="flex-shrink:0">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium">
+        <a href="" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-2 sm:px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="hidden sm:block px-2 sm:px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-navy text-white py-3 md:py-8 px-4 text-center">
+    <h1 class="font-serif text-2xl md:text-4xl font-bold mb-1">Center of Attention</h1>
+    <p class="text-blue-100 text-sm hidden md:block">By Rebel's Dad</p>
+  </header>
+
+  <!-- Main content -->
+  <main class="max-w-5xl mx-auto px-4 py-6">
+
+    <!-- Desktop active clue bar -->
+    <div id="active-clue-bar" class="mb-3 md:hidden">
+      <span id="active-clue-text">Select a cell to begin</span>
+    </div>
+
+    <!-- Mobile clue nav (sticky below nav, custom keyboard replaces OS kb) -->
+    <div id="mob-clue-nav">
+      <button class="mob-nav-btn" onclick="cycleClue(-1)" aria-label="Previous clue">‹</button>
+      <button id="mob-clue-text" class="mob-clue-text" onclick="toggleSelDir()">Select a cell</button>
+      <button class="mob-nav-btn" onclick="cycleClue(1)" aria-label="Next clue">›</button>
+      <button class="mob-clues-btn" onclick="openClueDrawer()">Clues</button>
+    </div>
+
+    <!-- Buttons -->
+    <div id="toolbar-bar" class="flex flex-wrap gap-2 mb-4 items-center">
+
+      <!-- Check dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('check-menu')" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors flex items-center gap-1">Check <span class="text-xs">▾</span></button>
+        <div id="check-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="checkLetter();closeMenus()" class="xw-menu-item">Letter</button>
+          <button onclick="checkWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="checkAll();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Reveal dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('reveal-menu')" class="px-3 py-1.5 bg-navy text-white rounded text-sm font-medium hover:bg-navy-dark transition-colors flex items-center gap-1">Reveal <span class="text-xs">▾</span></button>
+        <div id="reveal-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="revealLetter();closeMenus()" class="xw-menu-item">Letter</button>
+          <button onclick="revealWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="revealPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Clear dropdown -->
+      <div class="relative">
+        <button onclick="toggleMenu('clear-menu')" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors flex items-center gap-1">Clear <span class="text-xs">▾</span></button>
+        <div id="clear-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+          <button onclick="clearWord();closeMenus()" class="xw-menu-item">Word</button>
+          <button onclick="clearPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
+        </div>
+      </div>
+
+      <!-- Rebus toggle -->
+      <button id="rebus-btn" onclick="toggleRebus()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors" data-on="0">Rebus</button>
+
+      <!-- Autocheck toggle -->
+      <button id="autocheck-btn" onclick="toggleAutocheck()" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors" data-on="0">Autocheck: Off</button>
+
+    </div>
+
+    <!-- Layout: grid left, clues right -->
+    <div id="grid-layout" class="flex flex-col md:flex-row gap-6">
+
+      <!-- Grid -->
+      <div id="grid-viewport" class="flex-shrink-0">
+        <div class="xw-grid" id="xw-grid" role="grid" aria-label="Crossword grid"></div>
+      </div>
+
+      <!-- Clue panels (desktop only; mobile uses drawer) -->
+      <div id="clue-panels" class="flex-1 flex flex-col sm:flex-row md:flex-col gap-4 overflow-y-auto" style="max-height: 600px;">
+
+        <!-- Across -->
+        <div class="flex-1">
+          <h3 class="font-serif font-bold text-navy text-base mb-2 border-b border-navy pb-1">Across</h3>
+          <div id="across-list" class="space-y-0.5"></div>
+        </div>
+
+        <!-- Down -->
+        <div class="flex-1">
+          <h3 class="font-serif font-bold text-navy text-base mb-2 border-b border-navy pb-1">Down</h3>
+          <div id="down-list" class="space-y-0.5"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  
+  <style>
+  .fb-chip{cursor:pointer;display:inline-flex;align-items:center;padding:.375rem .875rem;border:1.5px solid #d6d3d1;border-radius:9999px;font-size:.875rem;color:#57534e;transition:all .15s;user-select:none}
+  .fb-chip:has(input:checked){border-color:#1e3a5f;background:#1e3a5f;color:#fff}
+  .fb-chip:hover:not(:has(input:checked)){border-color:#1e3a5f;color:#1e3a5f}
+  </style>
+  <section id="puzzle-feedback" class="max-w-2xl mx-auto px-5 py-8 mt-2 border-t border-stone-200">
+    <h2 class="font-serif text-lg font-bold text-stone-800 mb-4">How&rsquo;d we do?</h2>
+    <form id="fb-form" action="https://formspree.io/f/__FORMSPREE_ID__" method="POST">
+      <input type="hidden" name="puzzle" value="Center of Attention">
+      <input type="hidden" name="_subject" value="Puzzle Feedback: Center of Attention">
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">Like this puzzle?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="liked" value="Yes" class="sr-only"><span>&#x1F44D; Yes</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="Meh" class="sr-only"><span>&#x1F937; Meh</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="No"  class="sr-only"><span>&#x1F44E; No</span></label>
+        </div>
+      </div>
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">How was the difficulty?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Easy"   class="sr-only"><span>Too Easy</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Just Right" class="sr-only"><span>Just Right</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Hard"   class="sr-only"><span>Too Hard</span></label>
+        </div>
+      </div>
+      <div id="fb-comment-wrap" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+        <div class="pb-4">
+          <textarea name="comment" placeholder="Anything else to add? (optional)" rows="3"
+            class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"></textarea>
+          <button type="submit"
+            class="mt-2 px-5 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#162d4a] transition-colors">
+            Send feedback
+          </button>
+        </div>
+      </div>
+      <p id="fb-thanks" class="hidden text-sm text-green-700 font-medium mt-2">Thanks for the feedback! &#x1F43E;</p>
+    </form>
+    <p class="text-xs text-stone-400 mt-4">Like the puzzle? Buy Rebel&rsquo;s Dad or Rebel a drink or Pup Cup. Find a mistake? Rebel&rsquo;s Dad will buy you a drink (but Rebel would still prefer a Pup Cup).</p>
+  </section>
+  <script>
+  (function(){
+    var wrap = document.getElementById('fb-comment-wrap');
+    var opened = false;
+    function openForm(){
+      if(opened) return;
+      opened = true;
+      wrap.style.maxHeight = '300px';
+    }
+    document.querySelectorAll('#fb-form input[type="radio"]').forEach(function(r){
+      r.addEventListener('change', openForm);
+    });
+    var form = document.getElementById('fb-form');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      fetch(form.action, {method:'POST', body: new FormData(form), headers:{Accept:'application/json'}})
+        .then(function(){
+          document.getElementById('fb-thanks').classList.remove('hidden');
+          form.querySelector('button[type="submit"]').disabled = true;
+        })
+        .catch(function(){});
+    });
+  }());
+  </script>
+
+<footer class="bg-navy text-blue-100 text-sm py-8 px-4 mt-12">
+    <div class="max-w-5xl mx-auto text-center space-y-1">
+      
+      <p class="mt-2">This puzzle is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="underline hover:text-white">CC BY-SA 4.0</a>.</p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Mobile custom keyboard (includes compact toolbar strip) -->
+  <div id="mob-kb">
+    <div id="mob-toolbar-strip">
+      <div class="mob-drop-wrap">
+        <button onclick="toggleMenu('mob-check-menu')" class="mob-tool-btn">Check ▾</button>
+        <div id="mob-check-menu" class="mob-drop-menu xw-menu hidden">
+          <button onclick="checkLetter();closeMenus()" class="mob-drop-item">Letter</button>
+          <button onclick="checkWord();closeMenus()" class="mob-drop-item">Word</button>
+          <button onclick="checkAll();closeMenus()" class="mob-drop-item">Puzzle</button>
+        </div>
+      </div>
+      <div class="mob-drop-wrap">
+        <button onclick="toggleMenu('mob-reveal-menu')" class="mob-tool-btn">Reveal ▾</button>
+        <div id="mob-reveal-menu" class="mob-drop-menu xw-menu hidden">
+          <button onclick="revealLetter();closeMenus()" class="mob-drop-item">Letter</button>
+          <button onclick="revealWord();closeMenus()" class="mob-drop-item">Word</button>
+          <button onclick="revealPuzzle();closeMenus()" class="mob-drop-item">Puzzle</button>
+        </div>
+      </div>
+      <button onclick="clearWord()" class="mob-tool-btn">Clear</button>
+      <button id="mob-rebus-btn" onclick="toggleRebus()" class="mob-tool-btn">Rebus</button>
+      <button id="mob-autocheck-btn" onclick="toggleAutocheck()" class="mob-tool-btn">Auto&#x2713;</button>
+    </div>
+  </div>
+
+  <!-- Mobile clue drawer -->
+  <div id="clue-drawer">
+    <div id="clue-drawer-bg" onclick="closeClueDrawer()"></div>
+    <div id="clue-drawer-sheet">
+      <div class="sticky top-0 bg-white pt-4 pb-3 flex items-center justify-between border-b border-gray-200 mb-3">
+        <h3 class="font-serif font-bold text-navy text-lg">Clues</h3>
+        <button onclick="closeClueDrawer()" class="text-gray-400 text-3xl leading-none hover:text-gray-600">&times;</button>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <h4 class="font-serif font-bold text-navy border-b border-navy pb-1 mb-2 text-sm">Across</h4>
+          <div id="mob-across-list"></div>
+        </div>
+        <div class="flex-1">
+          <h4 class="font-serif font-bold text-navy border-b border-navy pb-1 mb-2 text-sm">Down</h4>
+          <div id="mob-down-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden input for keyboard capture (positioned at selected cell so iOS scrolls correctly) -->
+  <input id="xw-input" type="text" inputmode="text" style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;border:none;padding:0;margin:0;font-size:16px;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+
+<script>
+// ============================================================
+// Puzzle data
+// ============================================================
+const PUZZLE = {"width":15,"height":15,"grid":[[{"black":false,"number":1,"shaded":false},{"black":false,"number":2,"shaded":false},{"black":false,"number":3,"shaded":false},{"black":false,"number":4,"shaded":false},{"black":false,"number":5,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":6,"shaded":false},{"black":false,"number":7,"shaded":false},{"black":false,"number":8,"shaded":false},{"black":false,"number":9,"shaded":false},{"black":false,"number":10,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":11,"shaded":false},{"black":false,"number":12,"shaded":false},{"black":false,"number":13,"shaded":false}],[{"black":false,"number":14,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":15,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":16,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":17,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":true},{"black":false,"number":18,"shaded":true},{"black":false,"number":null,"shaded":true},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":19,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":20,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":21,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":22,"shaded":false},{"black":false,"number":23,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":24,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":25,"shaded":false},{"black":false,"number":26,"shaded":true},{"black":false,"number":27,"shaded":true},{"black":false,"number":null,"shaded":true},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":28,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":29,"shaded":false},{"black":false,"number":30,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":31,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":32,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":33,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":34,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":35,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false}],[{"black":true,"number":null,"shaded":false},{"black":false,"number":36,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":37,"shaded":false},{"black":false,"number":38,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":39,"shaded":false},{"black":false,"number":40,"shaded":false},{"black":true,"number":null,"shaded":false}],[{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":41,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":42,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":43,"shaded":false}],[{"black":false,"number":44,"shaded":false},{"black":false,"number":45,"shaded":false},{"black":false,"number":46,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":47,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":48,"shaded":false},{"black":false,"number":49,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":50,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":51,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":true},{"black":false,"number":null,"shaded":true},{"black":false,"number":52,"shaded":true},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":53,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":54,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":55,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":56,"shaded":false},{"black":false,"number":57,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false}],[{"black":false,"number":58,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":59,"shaded":false},{"black":false,"number":60,"shaded":false},{"black":false,"number":61,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":true},{"black":false,"number":null,"shaded":true},{"black":false,"number":null,"shaded":true},{"black":false,"number":62,"shaded":false},{"black":false,"number":63,"shaded":false}],[{"black":false,"number":64,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":65,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":66,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}],[{"black":false,"number":67,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":68,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":true,"number":null,"shaded":false},{"black":false,"number":69,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false},{"black":false,"number":null,"shaded":false}]],"across":[{"number":1,"clue":"Cries and cries","cells":[{"row":0,"col":0},{"row":0,"col":1},{"row":0,"col":2},{"row":0,"col":3},{"row":0,"col":4}]},{"number":6,"clue":"Compile","cells":[{"row":0,"col":6},{"row":0,"col":7},{"row":0,"col":8},{"row":0,"col":9},{"row":0,"col":10}]},{"number":11,"clue":"South Asian honorific that is an anagram of 9-Down","cells":[{"row":0,"col":12},{"row":0,"col":13},{"row":0,"col":14}]},{"number":14,"clue":"Congresswoman Omar","cells":[{"row":1,"col":0},{"row":1,"col":1},{"row":1,"col":2},{"row":1,"col":3},{"row":1,"col":4}]},{"number":15,"clue":"\"Stranger Things\" actress Sink","cells":[{"row":1,"col":6},{"row":1,"col":7},{"row":1,"col":8},{"row":1,"col":9},{"row":1,"col":10}]},{"number":16,"clue":"Dads, informally","cells":[{"row":1,"col":12},{"row":1,"col":13},{"row":1,"col":14}]},{"number":17,"clue":"1955 Beverly Cleary novel","cells":[{"row":2,"col":0},{"row":2,"col":1},{"row":2,"col":2},{"row":2,"col":3},{"row":2,"col":4},{"row":2,"col":5},{"row":2,"col":6},{"row":2,"col":7},{"row":2,"col":8},{"row":2,"col":9},{"row":2,"col":10},{"row":2,"col":11},{"row":2,"col":12},{"row":2,"col":13},{"row":2,"col":14}]},{"number":20,"clue":"Repair a spine, in a way","cells":[{"row":3,"col":2},{"row":3,"col":3},{"row":3,"col":4},{"row":3,"col":5},{"row":3,"col":6},{"row":3,"col":7}]},{"number":21,"clue":"Teensy","cells":[{"row":3,"col":11},{"row":3,"col":12},{"row":3,"col":13},{"row":3,"col":14}]},{"number":22,"clue":"\"My dog ___ my homework\" (lame excuse)","cells":[{"row":4,"col":0},{"row":4,"col":1},{"row":4,"col":2}]},{"number":24,"clue":"Cookie brand found in vending machines","cells":[{"row":4,"col":5},{"row":4,"col":6},{"row":4,"col":7},{"row":4,"col":8},{"row":4,"col":9},{"row":4,"col":10},{"row":4,"col":11},{"row":4,"col":12},{"row":4,"col":13},{"row":4,"col":14}]},{"number":28,"clue":"According to a saying, converts are often these","cells":[{"row":5,"col":0},{"row":5,"col":1},{"row":5,"col":2},{"row":5,"col":3},{"row":5,"col":4},{"row":5,"col":5},{"row":5,"col":6}]},{"number":31,"clue":"Musical doctor?","cells":[{"row":5,"col":8},{"row":5,"col":9},{"row":5,"col":10}]},{"number":32,"clue":"Pouty","cells":[{"row":5,"col":12},{"row":5,"col":13},{"row":5,"col":14}]},{"number":33,"clue":"South Asian language","cells":[{"row":6,"col":0},{"row":6,"col":1},{"row":6,"col":2},{"row":6,"col":3},{"row":6,"col":4}]},{"number":34,"clue":"2017 X-Men film","cells":[{"row":6,"col":7},{"row":6,"col":8},{"row":6,"col":9},{"row":6,"col":10},{"row":6,"col":11}]},{"number":36,"clue":"[THIS WEEK'S HINT] Flyover country, or a feature of 4 answers in this puzzle","cells":[{"row":7,"col":1},{"row":7,"col":2},{"row":7,"col":3},{"row":7,"col":4},{"row":7,"col":5},{"row":7,"col":6},{"row":7,"col":7},{"row":7,"col":8},{"row":7,"col":9},{"row":7,"col":10},{"row":7,"col":11},{"row":7,"col":12},{"row":7,"col":13}]},{"number":41,"clue":"Like a hedgehog","cells":[{"row":8,"col":3},{"row":8,"col":4},{"row":8,"col":5},{"row":8,"col":6},{"row":8,"col":7}]},{"number":42,"clue":"Clumps","cells":[{"row":8,"col":10},{"row":8,"col":11},{"row":8,"col":12},{"row":8,"col":13},{"row":8,"col":14}]},{"number":44,"clue":"Planking makes them stronger","cells":[{"row":9,"col":0},{"row":9,"col":1},{"row":9,"col":2}]},{"number":47,"clue":"Color of a matador's cape","cells":[{"row":9,"col":4},{"row":9,"col":5},{"row":9,"col":6}]},{"number":48,"clue":"Reacted to a light show, perhaps","cells":[{"row":9,"col":8},{"row":9,"col":9},{"row":9,"col":10},{"row":9,"col":11},{"row":9,"col":12},{"row":9,"col":13},{"row":9,"col":14}]},{"number":50,"clue":"Someone with a superiority complex","cells":[{"row":10,"col":0},{"row":10,"col":1},{"row":10,"col":2},{"row":10,"col":3},{"row":10,"col":4},{"row":10,"col":5},{"row":10,"col":6},{"row":10,"col":7},{"row":10,"col":8},{"row":10,"col":9}]},{"number":53,"clue":"Animal in Liberty Mutual ads","cells":[{"row":10,"col":12},{"row":10,"col":13},{"row":10,"col":14}]},{"number":54,"clue":"Queen of 35-Down, for short","cells":[{"row":11,"col":0},{"row":11,"col":1},{"row":11,"col":2},{"row":11,"col":3}]},{"number":55,"clue":"\"Cat's in the Cradle\" singer Harry","cells":[{"row":11,"col":7},{"row":11,"col":8},{"row":11,"col":9},{"row":11,"col":10},{"row":11,"col":11},{"row":11,"col":12}]},{"number":58,"clue":"\"Oh god! We're doomed!\"","cells":[{"row":12,"col":0},{"row":12,"col":1},{"row":12,"col":2},{"row":12,"col":3},{"row":12,"col":4},{"row":12,"col":5},{"row":12,"col":6},{"row":12,"col":7},{"row":12,"col":8},{"row":12,"col":9},{"row":12,"col":10},{"row":12,"col":11},{"row":12,"col":12},{"row":12,"col":13},{"row":12,"col":14}]},{"number":64,"clue":"Vote Republican, eg.","cells":[{"row":13,"col":0},{"row":13,"col":1},{"row":13,"col":2}]},{"number":65,"clue":"\"If _____ Street Could Talk\" (2018 film that adapted a James Baldwin novel)","cells":[{"row":13,"col":4},{"row":13,"col":5},{"row":13,"col":6},{"row":13,"col":7},{"row":13,"col":8}]},{"number":66,"clue":"Domesticates","cells":[{"row":13,"col":10},{"row":13,"col":11},{"row":13,"col":12},{"row":13,"col":13},{"row":13,"col":14}]},{"number":67,"clue":"Calendar toppers, for short","cells":[{"row":14,"col":0},{"row":14,"col":1},{"row":14,"col":2}]},{"number":68,"clue":"Secure a rope, in rock climbing","cells":[{"row":14,"col":4},{"row":14,"col":5},{"row":14,"col":6},{"row":14,"col":7},{"row":14,"col":8}]},{"number":69,"clue":"Stereotypical textile for a college professor","cells":[{"row":14,"col":10},{"row":14,"col":11},{"row":14,"col":12},{"row":14,"col":13},{"row":14,"col":14}]}],"down":[{"number":1,"clue":"Apparel for babies and lobster eaters","cells":[{"row":0,"col":0},{"row":1,"col":0},{"row":2,"col":0}]},{"number":2,"clue":"Growlerz purchase","cells":[{"row":0,"col":1},{"row":1,"col":1},{"row":2,"col":1}]},{"number":3,"clue":"Lost person's query","cells":[{"row":0,"col":2},{"row":1,"col":2},{"row":2,"col":2},{"row":3,"col":2},{"row":4,"col":2},{"row":5,"col":2},{"row":6,"col":2},{"row":7,"col":2}]},{"number":4,"clue":"Lay idle","cells":[{"row":0,"col":3},{"row":1,"col":3},{"row":2,"col":3},{"row":3,"col":3}]},{"number":5,"clue":"Rudely disinvite","cells":[{"row":0,"col":4},{"row":1,"col":4},{"row":2,"col":4},{"row":3,"col":4}]},{"number":6,"clue":"Yoga studio sight, at times","cells":[{"row":0,"col":6},{"row":1,"col":6},{"row":2,"col":6},{"row":3,"col":6},{"row":4,"col":6},{"row":5,"col":6}]},{"number":7,"clue":"A green one is said to be an aphrodisiac","cells":[{"row":0,"col":7},{"row":1,"col":7},{"row":2,"col":7},{"row":3,"col":7},{"row":4,"col":7}]},{"number":8,"clue":"Pile on","cells":[{"row":0,"col":8},{"row":1,"col":8},{"row":2,"col":8}]},{"number":9,"clue":"British honorific that is an anagram of 11-Across","cells":[{"row":0,"col":9},{"row":1,"col":9},{"row":2,"col":9}]},{"number":10,"clue":"Hawk or Tac preceder","cells":[{"row":0,"col":10},{"row":1,"col":10},{"row":2,"col":10}]},{"number":11,"clue":"Request from a weightlifter","cells":[{"row":0,"col":12},{"row":1,"col":12},{"row":2,"col":12},{"row":3,"col":12},{"row":4,"col":12},{"row":5,"col":12}]},{"number":12,"clue":"Kidnapper's desire","cells":[{"row":0,"col":13},{"row":1,"col":13},{"row":2,"col":13},{"row":3,"col":13},{"row":4,"col":13},{"row":5,"col":13}]},{"number":13,"clue":"Parent's response to \"Why?\"","cells":[{"row":0,"col":14},{"row":1,"col":14},{"row":2,"col":14},{"row":3,"col":14},{"row":4,"col":14},{"row":5,"col":14}]},{"number":18,"clue":"Sort (through)","cells":[{"row":2,"col":5},{"row":3,"col":5},{"row":4,"col":5},{"row":5,"col":5}]},{"number":19,"clue":"\"Paper Planes\" rapper","cells":[{"row":2,"col":11},{"row":3,"col":11},{"row":4,"col":11}]},{"number":22,"clue":"Medicine taken in \"Rent\"","cells":[{"row":4,"col":0},{"row":5,"col":0},{"row":6,"col":0}]},{"number":23,"clue":"I-less group?","cells":[{"row":4,"col":1},{"row":5,"col":1},{"row":6,"col":1},{"row":7,"col":1}]},{"number":25,"clue":"Former NBA star Lamar","cells":[{"row":4,"col":8},{"row":5,"col":8},{"row":6,"col":8},{"row":7,"col":8}]},{"number":26,"clue":"Strong desire","cells":[{"row":4,"col":9},{"row":5,"col":9},{"row":6,"col":9},{"row":7,"col":9}]},{"number":27,"clue":"Useful email feature","cells":[{"row":4,"col":10},{"row":5,"col":10},{"row":6,"col":10},{"row":7,"col":10},{"row":8,"col":10},{"row":9,"col":10}]},{"number":29,"clue":"They're usually on top","cells":[{"row":5,"col":3},{"row":6,"col":3},{"row":7,"col":3},{"row":8,"col":3}]},{"number":30,"clue":"No newbie","cells":[{"row":5,"col":4},{"row":6,"col":4},{"row":7,"col":4},{"row":8,"col":4},{"row":9,"col":4},{"row":10,"col":4}]},{"number":34,"clue":"Have sex (with)","cells":[{"row":6,"col":7},{"row":7,"col":7},{"row":8,"col":7}]},{"number":35,"clue":"River that turned to blood in Exodus","cells":[{"row":6,"col":11},{"row":7,"col":11},{"row":8,"col":11},{"row":9,"col":11}]},{"number":37,"clue":"Stead","cells":[{"row":7,"col":5},{"row":8,"col":5},{"row":9,"col":5},{"row":10,"col":5}]},{"number":38,"clue":"Means justifiers, or not","cells":[{"row":7,"col":6},{"row":8,"col":6},{"row":9,"col":6},{"row":10,"col":6}]},{"number":39,"clue":"Secret alias","cells":[{"row":7,"col":12},{"row":8,"col":12},{"row":9,"col":12},{"row":10,"col":12},{"row":11,"col":12},{"row":12,"col":12},{"row":13,"col":12},{"row":14,"col":12}]},{"number":40,"clue":"Man often painted in the nude","cells":[{"row":7,"col":13},{"row":8,"col":13},{"row":9,"col":13},{"row":10,"col":13}]},{"number":43,"clue":"Man's name that sounds like a meal","cells":[{"row":8,"col":14},{"row":9,"col":14},{"row":10,"col":14}]},{"number":44,"clue":"Advanced sci. class","cells":[{"row":9,"col":0},{"row":10,"col":0},{"row":11,"col":0},{"row":12,"col":0},{"row":13,"col":0},{"row":14,"col":0}]},{"number":45,"clue":"Traditional Cuban music","cells":[{"row":9,"col":1},{"row":10,"col":1},{"row":11,"col":1},{"row":12,"col":1},{"row":13,"col":1},{"row":14,"col":1}]},{"number":46,"clue":"Slings mud at","cells":[{"row":9,"col":2},{"row":10,"col":2},{"row":11,"col":2},{"row":12,"col":2},{"row":13,"col":2},{"row":14,"col":2}]},{"number":48,"clue":"Actress Judd","cells":[{"row":9,"col":8},{"row":10,"col":8},{"row":11,"col":8},{"row":12,"col":8},{"row":13,"col":8},{"row":14,"col":8}]},{"number":49,"clue":"\"Don't Be Dumb\" rapper Rocky","cells":[{"row":9,"col":9},{"row":10,"col":9},{"row":11,"col":9},{"row":12,"col":9}]},{"number":51,"clue":"Online abbr. indicating a specific perspective","cells":[{"row":10,"col":3},{"row":11,"col":3},{"row":12,"col":3}]},{"number":52,"clue":"Popular Amtrak line","cells":[{"row":10,"col":7},{"row":11,"col":7},{"row":12,"col":7},{"row":13,"col":7},{"row":14,"col":7}]},{"number":56,"clue":"Golf stroke that keeps the ball on the ground","cells":[{"row":11,"col":10},{"row":12,"col":10},{"row":13,"col":10},{"row":14,"col":10}]},{"number":57,"clue":"\"You don't need to tell me\"","cells":[{"row":11,"col":11},{"row":12,"col":11},{"row":13,"col":11},{"row":14,"col":11}]},{"number":59,"clue":"Recede","cells":[{"row":12,"col":4},{"row":13,"col":4},{"row":14,"col":4}]},{"number":60,"clue":"Word in some women's bios","cells":[{"row":12,"col":5},{"row":13,"col":5},{"row":14,"col":5}]},{"number":61,"clue":"AI who refused to open the pod bay doors","cells":[{"row":12,"col":6},{"row":13,"col":6},{"row":14,"col":6}]},{"number":62,"clue":"Martial artist Bruce","cells":[{"row":12,"col":13},{"row":13,"col":13},{"row":14,"col":13}]},{"number":63,"clue":"Timothy Leary's drug","cells":[{"row":12,"col":14},{"row":13,"col":14},{"row":14,"col":14}]}],"solutionRows":["QkFXTFMuQU1BU1MuU1JJ","SUxIQU4uU0FESUUuUEFT","QkVFWlVTQU5EUkFNT05B","Li5SRUJJTkQuLi5JVFNZ","QVRFLi5GQU1PVVNBTU9T","WkVBTE9UUy5EUkUuRU1P","VEFNSUwuLkxPR0FOLi4u","Lk1JRERMRUFNRVJJQ0Eu","Li4uU1BJTlkuLkNMT0RT","QUJTLlJFRC5BQUhFREFU","UE9NUE9VU0FTUy4uRU1V","Q0xFTy4uLkNIQVBJTi4u","SEVBVkVOSEVMUFVTQUxM","RVJSLkJFQUxFLlRBTUVT","TU9TLkJFTEFZLlRXRUVE"]};
+
+// Decode solution
+const solution = PUZZLE.solutionRows.map(row => atob(row));
+
+function getSolution(r, c) {
+  return solution[r][c];
+}
+
+// ============================================================
+// State
+// ============================================================
+const W = PUZZLE.width;
+const H = PUZZLE.height;
+const userGrid = Array.from({length: H}, () => new Array(W).fill(''));
+const cellState = Array.from({length: H}, () => new Array(W).fill(null)); // null|'correct'|'incorrect'|'revealed'
+
+let selRow = -1, selCol = -1;
+let selDir = 'across'; // 'across' | 'down'
+let selAcrossIdx = -1, selDownIdx = -1;
+
+// Build lookup maps
+const cellAcrossIdx = {}; // "r,c" -> index in PUZZLE.across
+const cellDownIdx = {};   // "r,c" -> index in PUZZLE.down
+
+PUZZLE.across.forEach((word, idx) => {
+  word.cells.forEach(({row, col}) => { cellAcrossIdx[`${row},${col}`] = idx; });
+});
+PUZZLE.down.forEach((word, idx) => {
+  word.cells.forEach(({row, col}) => { cellDownIdx[`${row},${col}`] = idx; });
+});
+
+function isBlack(r, c) {
+  return r < 0 || r >= H || c < 0 || c >= W || PUZZLE.grid[r][c].black;
+}
+
+// ============================================================
+// Build DOM
+// ============================================================
+const gridEl = document.getElementById('xw-grid');
+const cellEls = []; // cellEls[r][c]
+
+for (let r = 0; r < H; r++) {
+  cellEls.push([]);
+  for (let c = 0; c < W; c++) {
+    const cell = PUZZLE.grid[r][c];
+    const div = document.createElement('div');
+    div.className = 'xw-cell ' + (cell.black ? 'black' : cell.shaded ? 'shaded' : 'white');
+    div.dataset.row = r;
+    div.dataset.col = c;
+    div.setAttribute('role', 'gridcell');
+
+    if (!cell.black) {
+      if (cell.number) {
+        const numSpan = document.createElement('span');
+        numSpan.className = 'cell-number';
+        numSpan.textContent = cell.number;
+        div.appendChild(numSpan);
+      }
+      const letSpan = document.createElement('span');
+      letSpan.className = 'cell-letter';
+      letSpan.id = `letter-${r}-${c}`;
+      div.appendChild(letSpan);
+
+      div.addEventListener('click', () => onCellClick(r, c));
+    }
+
+    gridEl.appendChild(div);
+    cellEls[r].push(div);
+  }
+}
+
+// Build clue lists
+function buildClueList(words, containerId, dir) {
+  const container = document.getElementById(containerId);
+  words.forEach((word, idx) => {
+    const div = document.createElement('div');
+    div.className = 'clue-item';
+    div.id = `clue-${dir}-${idx}`;
+    div.innerHTML = `<span class="clue-num">${word.number}.</span>${escapeHtml(word.clue)}`;
+    div.addEventListener('click', () => selectWord(dir, idx));
+    container.appendChild(div);
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+buildClueList(PUZZLE.across, 'across-list', 'across');
+buildClueList(PUZZLE.down, 'down-list', 'down');
+
+// ============================================================
+// Selection & highlighting
+// ============================================================
+function baseClass(r, c) {
+  return PUZZLE.grid[r][c].shaded ? 'shaded' : 'white';
+}
+
+function clearHighlights() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (!PUZZLE.grid[r][c].black) {
+        const st = cellState[r][c];
+        cellEls[r][c].className = 'xw-cell ' + baseClass(r,c) + (st ? ' ' + st : '');
+      }
+    }
+  }
+  document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('active-clue'));
+}
+
+function applyHighlights() {
+  clearHighlights();
+  if (selRow < 0 || selCol < 0) return;
+
+  // Highlight word cells
+  const wordCells = currentWordCells();
+  wordCells.forEach(({row, col}) => {
+    const st = cellState[row][col];
+    cellEls[row][col].className = 'xw-cell ' + baseClass(row,col) + ' word-highlight' + (st ? ' ' + st : '');
+  });
+
+  // Highlight selected cell
+  const st = cellState[selRow][selCol];
+  cellEls[selRow][selCol].className = 'xw-cell ' + baseClass(selRow,selCol) + ' selected' + (st ? ' ' + st : '');
+
+  // Highlight clue (desktop + drawer)
+  const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
+  if (wordIdx >= 0) {
+    const clueEl = document.getElementById(`clue-${selDir}-${wordIdx}`);
+    if (clueEl) {
+      clueEl.classList.add('active-clue');
+      clueEl.scrollIntoView({block: 'nearest'});
+    }
+    const mobClueEl = document.getElementById(`mob-clue-${selDir}-${wordIdx}`);
+    if (mobClueEl) mobClueEl.classList.add('active-clue');
+  }
+
+  // Update mobile clue bar
+  updateClueBar();
+}
+
+function updateClueBar() {
+  const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
+  const words = selDir === 'across' ? PUZZLE.across : PUZZLE.down;
+  const label = wordIdx >= 0
+    ? `${words[wordIdx].number}-${selDir === 'across' ? 'A' : 'D'}: ${words[wordIdx].clue}`
+    : 'Select a cell to begin';
+
+  const bar = document.getElementById('active-clue-text');
+  if (bar) bar.textContent = label;
+
+  const mobBar = document.getElementById('mob-clue-text');
+  if (mobBar) mobBar.textContent = wordIdx >= 0 ? label : 'Select a cell';
+}
+
+function currentWordCells() {
+  if (selDir === 'across' && selAcrossIdx >= 0) return PUZZLE.across[selAcrossIdx].cells;
+  if (selDir === 'down' && selDownIdx >= 0) return PUZZLE.down[selDownIdx].cells;
+  return [];
+}
+
+// ============================================================
+// Selection logic
+// ============================================================
+function onCellClick(r, c) {
+  if (isBlack(r, c)) return;
+  exitRebus();
+  focusInput();
+
+  const sameCell = r === selRow && c === selCol;
+
+  if (sameCell) {
+    // Toggle direction if both are available
+    const hasAcross = cellAcrossIdx[`${r},${c}`] !== undefined;
+    const hasDown = cellDownIdx[`${r},${c}`] !== undefined;
+    if (hasAcross && hasDown) {
+      selDir = selDir === 'across' ? 'down' : 'across';
+    }
+  } else {
+    selRow = r; selCol = c;
+    // Pick best direction
+    const hasAcross = cellAcrossIdx[`${r},${c}`] !== undefined;
+    const hasDown = cellDownIdx[`${r},${c}`] !== undefined;
+    if (!hasAcross && hasDown) selDir = 'down';
+    else if (hasAcross && !hasDown) selDir = 'across';
+    // else keep current direction if valid, otherwise flip
+    else if (selDir === 'across' && !hasAcross) selDir = 'down';
+    else if (selDir === 'down' && !hasDown) selDir = 'across';
+  }
+
+  selAcrossIdx = cellAcrossIdx[`${r},${c}`] !== undefined ? cellAcrossIdx[`${r},${c}`] : -1;
+  selDownIdx = cellDownIdx[`${r},${c}`] !== undefined ? cellDownIdx[`${r},${c}`] : -1;
+
+  applyHighlights();
+  scrollCellIntoView();
+}
+
+function selectWord(dir, idx) {
+  const words = dir === 'across' ? PUZZLE.across : PUZZLE.down;
+  const word = words[idx];
+  selDir = dir;
+  // Select first empty cell, or first cell
+  let target = word.cells[0];
+  for (const cell of word.cells) {
+    if (!userGrid[cell.row][cell.col]) { target = cell; break; }
+  }
+  selRow = target.row; selCol = target.col;
+  selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
+  selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
+  applyHighlights();
+  scrollCellIntoView();
+  focusInput();
+}
+
+// ============================================================
+// Keyboard input
+// ============================================================
+const inputEl = document.getElementById('xw-input');
+
+function isMobile() { return window.innerWidth < 900; }
+
+function getCellSize() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 40;
+}
+
+function zoomToWord() {
+  if (!isMobile()) return;
+  if (selRow < 0 || selCol < 0) return;
+  const viewport = document.getElementById('grid-viewport');
+  if (!viewport) return;
+  const cells = currentWordCells();
+  if (!cells.length) return;
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  if (!vpW || !vpH) return;
+  const cs = getCellSize();
+  const minR = Math.min(...cells.map(c => c.row));
+  const maxR = Math.max(...cells.map(c => c.row));
+  const minC = Math.min(...cells.map(c => c.col));
+  const maxC = Math.max(...cells.map(c => c.col));
+  const wCols = maxC - minC + 1;
+  const wRows = maxR - minR + 1;
+  const pad = 1;
+  const scaleX = vpW  / ((wCols + 2 * pad) * cs);
+  const scaleY = vpH  / ((wRows + 2 * pad) * cs);
+  const scale  = Math.min(scaleX, scaleY, 2.5);
+  const cx = (minC + wCols / 2) * cs;
+  const cy = (minR + wRows / 2) * cs;
+  const tx = vpW / 2 - cx * scale;
+  const ty = vpH / 2 - cy * scale;
+  gridEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+}
+
+function initGridZoom() {
+  if (!isMobile()) return;
+  const viewport = document.getElementById('grid-viewport');
+  if (!viewport) return;
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  if (!vpW || !vpH) return;
+  const cs = getCellSize();
+  const gridW = W * cs;
+  const gridH = H * cs;
+  const scale = Math.min(vpW / gridW, vpH / gridH, 1);
+  const tx = (vpW - gridW * scale) / 2;
+  const ty = (vpH - gridH * scale) / 2;
+  gridEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  // Size clue bar to match actual rendered grid width
+  const clueNav = document.getElementById('mob-clue-nav');
+  if (clueNav) {
+    const actualW = Math.round(gridW * scale);
+    clueNav.style.width = actualW + 'px';
+    clueNav.style.alignSelf = 'center';
+  }
+}
+
+function focusInput() {
+  if (isMobile()) return; // custom keyboard handles input on mobile
+  if (selRow >= 0 && selCol >= 0) {
+    const rect = cellEls[selRow][selCol].getBoundingClientRect();
+    inputEl.style.top  = (window.scrollY + rect.top  + rect.height / 2) + 'px';
+    inputEl.style.left = (window.scrollX + rect.left + rect.width  / 2) + 'px';
+  }
+  inputEl.value = '';
+  inputEl.focus();
+}
+
+function scrollCellIntoView() {
+  if (isMobile()) {
+    initGridZoom();
+  } else {
+    zoomToWord();
+  }
+}
+
+// Mobile: beforeinput fires reliably for backspace on virtual keyboards
+inputEl.addEventListener('beforeinput', e => {
+  if (e.inputType === 'deleteContentBackward') {
+    e.preventDefault();
+    if (selRow >= 0) handleBackspace();
+  }
+});
+
+// Mobile: input event fires when virtual keyboard commits a character
+inputEl.addEventListener('input', () => {
+  const ch = inputEl.value.replace(/[^a-zA-Z]/g, '');
+  inputEl.value = '';
+  if (ch && selRow >= 0) handleLetter(ch[ch.length - 1].toUpperCase());
+});
+
+document.addEventListener('keydown', onKeyDown);
+
+function onKeyDown(e) {
+  if (selRow < 0) return;
+
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    exitRebus();
+    cycleClue(e.shiftKey ? -1 : 1);
+    return;
+  }
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (rebusMode) { exitRebus(); advanceInWord(); }
+    else { cycleClue(1); }
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    if (rebusMode) { e.preventDefault(); exitRebus(); }
+    return;
+  }
+
+  if (e.key === 'ArrowRight') { e.preventDefault(); exitRebus(); move(0, 1); return; }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); exitRebus(); move(0, -1); return; }
+  if (e.key === 'ArrowDown')  { e.preventDefault(); exitRebus(); move(1, 0); return; }
+  if (e.key === 'ArrowUp')    { e.preventDefault(); exitRebus(); move(-1, 0); return; }
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    handleBackspace();
+    return;
+  }
+
+  if (e.key === 'Delete') {
+    e.preventDefault();
+    exitRebus();
+    setCellContent(selRow, selCol, '');
+    return;
+  }
+
+  if (e.key.length === 1 && e.key.match(/[a-zA-Z]/)) {
+    e.preventDefault();
+    handleLetter(e.key.toUpperCase());
+    return;
+  }
+}
+
+function move(dr, dc) {
+  let r = selRow + dr, c = selCol + dc;
+  while (r >= 0 && r < H && c >= 0 && c < W && isBlack(r, c)) {
+    r += dr; c += dc;
+  }
+  if (r >= 0 && r < H && c >= 0 && c < W && !isBlack(r, c)) {
+    selRow = r; selCol = c;
+    if (dr !== 0) selDir = 'down';
+    if (dc !== 0) selDir = 'across';
+    selAcrossIdx = cellAcrossIdx[`${r},${c}`] !== undefined ? cellAcrossIdx[`${r},${c}`] : -1;
+    selDownIdx = cellDownIdx[`${r},${c}`] !== undefined ? cellDownIdx[`${r},${c}`] : -1;
+    applyHighlights();
+  }
+}
+
+function handleLetter(letter) {
+  if (rebusMode) {
+    // Append to current cell content
+    const current = userGrid[selRow][selCol] || '';
+    cellState[selRow][selCol] = null;
+    setCellContent(selRow, selCol, current + letter);
+    if (autocheck) {
+      const val = userGrid[selRow][selCol];
+      cellState[selRow][selCol] = val === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+    }
+    applyHighlights();
+  } else {
+    cellState[selRow][selCol] = null;
+    setCellContent(selRow, selCol, letter);
+    if (autocheck && letter) {
+      cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+    }
+    advanceInWord();
+    checkComplete();
+  }
+}
+
+// setCellContent: single source of truth for writing to a cell
+function setCellContent(r, c, text) {
+  userGrid[r][c] = text;
+  const el = document.getElementById(`letter-${r}-${c}`);
+  if (el) {
+    el.textContent = text;
+    el.classList.toggle('rebus', text.length > 1);
+  }
+}
+
+function setLetter(letter) {
+  cellState[selRow][selCol] = null;
+  setCellContent(selRow, selCol, letter);
+  if (autocheck && letter) {
+    cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+  }
+}
+
+function advanceInWord() {
+  const cells = currentWordCells();
+  const pos = cells.findIndex(c => c.row === selRow && c.col === selCol);
+  if (pos >= 0 && pos < cells.length - 1) {
+    const next = cells[pos + 1];
+    selRow = next.row; selCol = next.col;
+    selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
+    selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
+    applyHighlights();
+  }
+}
+
+function handleBackspace() {
+  if (rebusMode) {
+    const current = userGrid[selRow][selCol] || '';
+    if (current.length > 1) {
+      cellState[selRow][selCol] = null;
+      setCellContent(selRow, selCol, current.slice(0, -1));
+      applyHighlights();
+    } else {
+      cellState[selRow][selCol] = null;
+      setCellContent(selRow, selCol, '');
+      exitRebus();
+      applyHighlights();
+    }
+    return;
+  }
+  if (userGrid[selRow][selCol]) {
+    cellState[selRow][selCol] = null;
+    setLetter('');
+    applyHighlights();
+  } else {
+    // Move back
+    const cells = currentWordCells();
+    const pos = cells.findIndex(c => c.row === selRow && c.col === selCol);
+    if (pos > 0) {
+      const prev = cells[pos - 1];
+      selRow = prev.row; selCol = prev.col;
+      selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
+      selDownIdx = cellDownIdx[`${selRow},${selCol}`] !== undefined ? cellDownIdx[`${selRow},${selCol}`] : -1;
+      cellState[selRow][selCol] = null;
+      setLetter('');
+      applyHighlights();
+    }
+  }
+}
+
+function cycleClue(dir) {
+  // Build ordered list of all clues: across 0..n, down 0..m
+  const total = PUZZLE.across.length + PUZZLE.down.length;
+  const currentAcross = selDir === 'across' && selAcrossIdx >= 0;
+  const currentDown = selDir === 'down' && selDownIdx >= 0;
+  let flatIdx = 0;
+  if (currentAcross) flatIdx = selAcrossIdx;
+  else if (currentDown) flatIdx = PUZZLE.across.length + selDownIdx;
+  flatIdx = ((flatIdx + dir) + total) % total;
+
+  if (flatIdx < PUZZLE.across.length) {
+    selectWord('across', flatIdx);
+  } else {
+    selectWord('down', flatIdx - PUZZLE.across.length);
+  }
+}
+
+// ============================================================
+// ============================================================
+// Dropdown menus
+// ============================================================
+function toggleMenu(id) {
+  const menus = document.querySelectorAll('.xw-menu');
+  menus.forEach(m => { if (m.id !== id) m.classList.add('hidden'); });
+  document.getElementById(id).classList.toggle('hidden');
+}
+function closeMenus() {
+  document.querySelectorAll('.xw-menu').forEach(m => m.classList.add('hidden'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.relative') && !e.target.closest('.mob-drop-wrap')) closeMenus();
+});
+
+// ============================================================
+// Autocheck
+// ============================================================
+let rebusMode = false;
+function toggleRebus() {
+  if (selRow < 0) return;
+  rebusMode = !rebusMode;
+  const btn = document.getElementById('rebus-btn');
+  btn.classList.toggle('bg-navy', rebusMode);
+  btn.classList.toggle('text-white', rebusMode);
+  btn.classList.toggle('border-navy', !rebusMode);
+  btn.classList.toggle('text-navy', !rebusMode);
+  btn.dataset.on = rebusMode ? '1' : '0';
+  const mobBtn = document.getElementById('mob-rebus-btn');
+  if (mobBtn) mobBtn.classList.toggle('active', rebusMode);
+}
+function exitRebus() {
+  if (!rebusMode) return;
+  rebusMode = false;
+  const btn = document.getElementById('rebus-btn');
+  btn.classList.remove('bg-navy', 'text-white');
+  btn.classList.add('border-navy', 'text-navy');
+  btn.dataset.on = '0';
+  const mobBtn = document.getElementById('mob-rebus-btn');
+  if (mobBtn) mobBtn.classList.remove('active');
+}
+
+let autocheck = false;
+function toggleAutocheck() {
+  autocheck = !autocheck;
+  const btn = document.getElementById('autocheck-btn');
+  btn.textContent = 'Autocheck: ' + (autocheck ? 'On' : 'Off');
+  btn.classList.toggle('bg-navy', autocheck);
+  btn.classList.toggle('text-white', autocheck);
+  btn.classList.toggle('border-navy', !autocheck);
+  btn.classList.toggle('text-navy', !autocheck);
+  btn.dataset.on = autocheck ? '1' : '0';
+  const mobBtn = document.getElementById('mob-autocheck-btn');
+  if (mobBtn) mobBtn.classList.toggle('active', autocheck);
+  if (autocheck) checkAll();
+}
+
+// ============================================================
+// Check / Reveal / Clear
+// ============================================================
+function checkLetter() {
+  if (selRow < 0) return;
+  if (userGrid[selRow][selCol]) {
+    cellState[selRow][selCol] = userGrid[selRow][selCol] === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+  }
+  applyHighlights();
+}
+
+function checkWord() {
+  const cells = currentWordCells();
+  cells.forEach(({row, col}) => {
+    if (userGrid[row][col]) {
+      cellState[row][col] = userGrid[row][col] === getSolution(row, col) ? 'correct' : 'incorrect';
+    }
+  });
+  applyHighlights();
+}
+
+function checkAll() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (!PUZZLE.grid[r][c].black && userGrid[r][c]) {
+        cellState[r][c] = userGrid[r][c] === getSolution(r, c) ? 'correct' : 'incorrect';
+      }
+    }
+  }
+  applyHighlights();
+}
+
+function revealLetter() {
+  if (selRow < 0) return;
+  const sol = getSolution(selRow, selCol);
+  userGrid[selRow][selCol] = sol;
+  cellState[selRow][selCol] = 'revealed';
+  setCellContent(selRow, selCol, sol);
+  applyHighlights();
+  checkComplete();
+}
+
+function revealWord() {
+  const cells = currentWordCells();
+  cells.forEach(({row, col}) => {
+    const sol = getSolution(row, col);
+    userGrid[row][col] = sol;
+    cellState[row][col] = 'revealed';
+    setCellContent(row, col, sol);
+  });
+  applyHighlights();
+  checkComplete();
+}
+
+function revealPuzzle() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (PUZZLE.grid[r][c].black) continue;
+      const sol = getSolution(r, c);
+      userGrid[r][c] = sol;
+      cellState[r][c] = 'revealed';
+      setCellContent(r, c, sol);
+    }
+  }
+  applyHighlights();
+  checkComplete();
+}
+
+function clearWord() {
+  const cells = currentWordCells();
+  cells.forEach(({row, col}) => {
+    if (cellState[row][col] === 'revealed') return;
+    userGrid[row][col] = '';
+    cellState[row][col] = null;
+    setCellContent(row, col, '');
+  });
+  applyHighlights();
+}
+
+function clearPuzzle() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (PUZZLE.grid[r][c].black || cellState[r][c] === 'revealed') continue;
+      userGrid[r][c] = '';
+      cellState[r][c] = null;
+      setCellContent(r, c, '');
+    }
+  }
+  applyHighlights();
+}
+
+function checkComplete() {
+  let allFilled = true, allCorrect = true;
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (PUZZLE.grid[r][c].black) continue;
+      if (!userGrid[r][c]) { allFilled = false; break; }
+      if (userGrid[r][c] !== getSolution(r, c)) allCorrect = false;
+    }
+    if (!allFilled) break;
+  }
+  if (!allFilled) return;
+  if (allCorrect) showToast('Puzzle complete! Well done!');
+  else showToast('Puzzle filled in — but something’s not quite right!');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ============================================================
+// Mobile keyboard
+// ============================================================
+(function buildMobileKeyboard() {
+  const ROWS = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['⌫','Z','X','C','V','B','N','M','⏎']
+  ];
+  const kb = document.getElementById('mob-kb');
+  ROWS.forEach(keys => {
+    const row = document.createElement('div');
+    row.className = 'mob-kb-row';
+    keys.forEach(k => {
+      const btn = document.createElement('button');
+      btn.textContent = k;
+      btn.className = 'mob-key' + (k === '⌫' || k === '⏎' ? ' wide' : '');
+      btn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        handleMobileKey(k);
+      }, {passive: false});
+      btn.addEventListener('click', () => handleMobileKey(k));
+      row.appendChild(btn);
+    });
+    kb.appendChild(row);
+  });
+})();
+
+function handleMobileKey(k) {
+  if (selRow < 0) return;
+  if (k === '⌫') handleBackspace();       // ⌫ backspace
+  else if (k === '⏎') cycleClue(1);       // ⏎ next word
+  else handleLetter(k);
+}
+
+// Toggle across/down when tapping the clue bar text on mobile
+function toggleSelDir() {
+  if (selRow < 0) return;
+  const hasAcross = cellAcrossIdx[`${selRow},${selCol}`] !== undefined;
+  const hasDown   = cellDownIdx[`${selRow},${selCol}`] !== undefined;
+  if (hasAcross && hasDown) {
+    selDir = selDir === 'across' ? 'down' : 'across';
+    selAcrossIdx = cellAcrossIdx[`${selRow},${selCol}`] !== undefined ? cellAcrossIdx[`${selRow},${selCol}`] : -1;
+    selDownIdx   = cellDownIdx[`${selRow},${selCol}`] !== undefined   ? cellDownIdx[`${selRow},${selCol}`]   : -1;
+    applyHighlights();
+    if (isMobile()) {
+      initGridZoom();
+    } else {
+      zoomToWord();
+    }
+  }
+}
+
+// ============================================================
+// Clue drawer (mobile)
+// ============================================================
+(function buildClueDrawer() {
+  function buildList(words, containerId, dir) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    words.forEach((word, idx) => {
+      const div = document.createElement('div');
+      div.className = 'clue-item';
+      div.id = `mob-clue-${dir}-${idx}`;
+      div.innerHTML = `<span class="clue-num">${word.number}.</span>${escapeHtml(word.clue)}`;
+      div.addEventListener('click', () => { selectWord(dir, idx); closeClueDrawer(); });
+      container.appendChild(div);
+    });
+  }
+  buildList(PUZZLE.across, 'mob-across-list', 'across');
+  buildList(PUZZLE.down,   'mob-down-list',   'down');
+})();
+
+function openClueDrawer() {
+  document.getElementById('clue-drawer').classList.add('open');
+  // Scroll active clue into view inside drawer
+  const wordIdx = selDir === 'across' ? selAcrossIdx : selDownIdx;
+  if (wordIdx >= 0) {
+    const el = document.getElementById(`mob-clue-${selDir}-${wordIdx}`);
+    if (el) setTimeout(() => el.scrollIntoView({block: 'center'}), 50);
+  }
+}
+function closeClueDrawer() {
+  document.getElementById('clue-drawer').classList.remove('open');
+}
+
+// ============================================================
+// Init
+// ============================================================
+// Wait one frame so layout is fully computed before measuring grid-viewport
+requestAnimationFrame(() => {
+  if (PUZZLE.across.length > 0) {
+    selectWord('across', 0);
+  } else {
+    initGridZoom();
+  }
+});
+</script>
+</body>
+</html>
