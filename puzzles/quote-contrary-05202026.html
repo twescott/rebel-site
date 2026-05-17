@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quote Contrary | Rebel's Puzzles</title>
+  <style>
+    /* ── reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── page setup ── */
+    @page { size: letter; margin: 0.5in; }
+
+    /* ── shared page base ── */
+    .explain-page, .puzzle-page {
+      width: 7.5in;
+      min-height: 10in;
+      display: flex;
+      flex-direction: column;
+      font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+      font-size: 10pt;
+      color: #111;
+      background: #fff;
+    }
+
+    .answer-key-page {
+      width: 7.5in;
+      padding-top: 0.2in;
+      font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+      font-size: 10pt;
+      color: #111;
+      page-break-before: always;
+    }
+
+    /* ── brand header ── */
+    .brand {
+      text-align: center;
+      font-size: 8pt;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 4pt;
+    }
+
+    /* ── explanation page ── */
+    .explain-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8pt;
+    }
+
+    .explain-body {
+      font-size: 9.5pt;
+      line-height: 1.4;
+      margin-bottom: 7pt;
+    }
+
+    .qr-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      margin-top: 8pt;
+      margin-bottom: 4pt;
+      gap: 12pt;
+    }
+
+    .qr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    .qr-label {
+      font-size: 8.5pt;
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 4pt;
+    }
+
+    .qr-img {
+      width: 120px;
+      height: 120px;
+    }
+
+    /* ── tonight's puzzle + example ── */
+    .tonight-header {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 11pt;
+      font-weight: bold;
+      margin-top: 8pt;
+      margin-bottom: 4pt;
+    }
+
+    .ex-wrap {
+      border: 1pt solid #aaa;
+      padding: 5pt 8pt;
+      margin-top: 2pt;
+    }
+
+    .ex-puzzle-title {
+      font-family: Georgia, serif;
+      font-size: 9pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1pt;
+    }
+
+    .ex-instructions {
+      font-size: 6.5pt;
+      font-style: italic;
+      text-align: center;
+      color: #555;
+      margin-bottom: 4pt;
+    }
+
+    .ex-group { margin-bottom: 4pt; }
+
+    .ex-group-label {
+      font-size: 7pt;
+      font-weight: bold;
+      margin-bottom: 2pt;
+    }
+
+    .ex-word-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3pt;
+      margin-bottom: 2pt;
+    }
+
+    .ex-word-box {
+      border: 1px solid #888;
+      font-size: 6.5pt;
+      font-weight: 500;
+      text-align: center;
+      padding: 2pt 2pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+      min-height: 16pt;
+    }
+
+    .ex-solved {
+      border: 1.5px solid #000;
+      border-radius: 999pt;
+      font-weight: bold;
+    }
+
+    .ex-connection {
+      font-size: 6.5pt;
+      font-style: italic;
+      color: #444;
+    }
+
+    .ex-quote-section {
+      margin-top: 4pt;
+      text-align: center;
+      border-top: 0.5pt solid #bbb;
+      padding-top: 3pt;
+    }
+
+    .ex-quote-label {
+      font-size: 7pt;
+      font-weight: bold;
+      margin-bottom: 1pt;
+    }
+
+    .ex-quote-reveal {
+      font-family: 'Courier New', monospace;
+      font-size: 8pt;
+      font-weight: bold;
+    }
+
+    /* ── puzzle page ── */
+    .puzzle-page { page-break-before: always; }
+
+    .puzzle-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 22pt;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .byline {
+      text-align: center;
+      font-size: 9pt;
+      color: #555;
+      margin-top: 3pt;
+      margin-bottom: 8pt;
+    }
+
+    .instructions {
+      font-size: 9.5pt;
+      font-style: italic;
+      text-align: center;
+      color: #333;
+      margin-bottom: 10pt;
+    }
+
+    /* ── groups ── */
+    .groups { margin-bottom: 4pt; }
+
+    .group { margin-bottom: 8pt; }
+
+    .group-label {
+      font-family: Georgia, serif;
+      font-size: 10pt;
+      font-weight: bold;
+      margin-bottom: 3pt;
+    }
+
+    .word-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5pt;
+      margin-bottom: 3pt;
+    }
+
+    .word-box {
+      border: 1px solid #222;
+      font-size: 11pt;
+      font-weight: 600;
+      text-align: center;
+      padding: 5pt 3pt;
+      min-height: 30pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+    }
+
+    .connection-line {
+      font-size: 8.5pt;
+      font-style: italic;
+      color: #555;
+    }
+
+    .points {
+      font-style: normal;
+      color: #888;
+      font-size: 7.5pt;
+    }
+
+    /* ── hidden quote ── */
+    .hidden-quote { margin-top: 10pt; margin-bottom: 6pt; }
+
+    .hidden-quote-title {
+      font-family: Georgia, serif;
+      font-size: 12pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 6pt;
+    }
+
+    .quote-scoring {
+      font-size: 8pt;
+      font-style: italic;
+      text-align: center;
+      color: #555;
+      margin-bottom: 6pt;
+    }
+
+    .quote-line {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11pt;
+      text-align: center;
+      margin-bottom: 4pt;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .source-fields { margin-top: 16pt; }
+    .source-line {
+      font-size: 10.5pt;
+      margin-bottom: 6pt;
+      text-align: center;
+    }
+    .source-blank {
+      display: block;
+      text-align: center;
+      font-size: 10.5pt;
+      letter-spacing: 0.05em;
+      margin-top: 1pt;
+      margin-bottom: 6pt;
+    }
+
+    /* ── spacer pushes footer to bottom ── */
+    .spacer { flex: 1; }
+
+    /* ── feedback / footer ── */
+    .feedback {
+      border-top: 0.5pt solid #aaa;
+      padding-top: 6pt;
+      margin-top: 6pt;
+    }
+
+    .feedback-title { font-size: 8pt; font-weight: bold; margin-bottom: 3pt; }
+    .feedback-line  { font-size: 8pt; margin-bottom: 2pt; }
+
+    .feedback-drink {
+      font-size: 7.5pt;
+      font-style: italic;
+      text-align: center;
+      margin-top: 4pt;
+    }
+
+    .puzzle-copyright {
+      font-size: 7.5pt;
+      color: #888;
+      font-style: italic;
+      text-align: center;
+      margin-top: 2pt;
+    }
+
+    /* ── answer key ── */
+    .ak-title {
+      font-family: Georgia, serif;
+      font-size: 16pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 14pt;
+    }
+
+    .ak-subtitle {
+      font-size: 10pt;
+      font-style: italic;
+      text-align: center;
+      color: #555;
+      margin-bottom: 12pt;
+    }
+
+    .ak-group     { margin-bottom: 8pt; }
+    .ak-conn      { color: #555; font-size: 9pt; }
+    .ak-contrary  { border: 2.5px solid #000; border-radius: 999pt; font-weight: bold; }
+
+    .ak-quote-reveal {
+      margin-top: 14pt;
+      padding: 8pt 10pt;
+      border: 1pt solid #333;
+      font-size: 11pt;
+    }
+
+    .ak-bonus { margin-top: 10pt; font-size: 10pt; line-height: 1.6; }
+    .ak-theme { margin-top: 10pt; font-size: 10pt; }
+
+    .ak-copyright {
+      font-size: 7.5pt;
+      color: #999;
+      font-style: italic;
+      margin-top: 20pt;
+    }
+
+    /* ── screen preview ── */
+    @media screen {
+      body { background: #e5e7eb; padding: 0.5in; }
+      .explain-page, .puzzle-page, .answer-key-page {
+        background: #fff;
+        padding: 0.5in;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        margin-bottom: 0.5in;
+      }
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  
+  <!-- PAGE 1: EXPLANATION -->
+  <div class="explain-page">
+
+    <div class="explain-title">Rebel&rsquo;s Puzzles</div>
+
+    <p class="explain-body">Rebel&rsquo;s Puzzles is a social experiment being conducted by Rebel&rsquo;s Dad on the patrons of Growlerz Trivia Night. He thinks this will be a fun addition to Caryn&rsquo;s awesome trivia questions. Like Rebel, Rebel&rsquo;s Dad responds well to feedback. Train him well.</p>
+
+    <p class="explain-body">Each Sunday, there will be a new puzzle on Rebel&rsquo;s Blog, followed by a new &ldquo;Find It!&rdquo; puzzle on Tuesday. These puzzles will provide hints to the weekly Growlerz Trivia Night puzzle.</p>
+
+    
+    <div class="qr-row">
+      
+      <div class="qr-block">
+        <div class="qr-label">This week&rsquo;s crossword</div>
+        <img class="qr-img" src="data:image/png;base64,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" alt="Crossword QR code">
+      </div>
+      
+      <div class="qr-block">
+        <div class="qr-label">This week&rsquo;s Find It!</div>
+        <img class="qr-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAAAklEQVR4AewaftIAAAZ5SURBVO3BUW4bOBYAwW5C979yb74JGWAk2fFwX5X9wRiXWIxxkcUYF1mMcZHFGBdZjHGRB19Q+U0qTqicqDih8kzFTmVXsVP5tIqdyqsqdiq/ScVuMcZFFmNcZDHGRRZjXOTBX6j4biqnVHYVJ1ROVDyj8qqKEyqnVF5V8aqKn6ByYjHGRRZjXGQxxkUWY1zkwZtUXlXxjooTKicqdirvUNlVvKrilMqu4ieovKriVYsxLrIY4yKLMS6yGOMiDy6jsqvYqXxaxU7lhMo7VHYVJ1R2Ff9FizEushjjIosxLrIY4yIP/sNUdhUnKv4VlZ+g8v9mMcZFFmNcZDHGRRZjXOTBmyr+lYqdyomKncqu4pTKiYqdygmVT6v4tIp/YTHGRRZjXGQxxkUWY1zkwV9Q+U1UdhU7lU9T2VXsVF5VsVN5pmKnsqvYqewqTqj8JosxLrIY4yKLMS6yGOMiizEuYn9wOZVdxQmVZyp2KruKncqu4h0qr6q4xWKMiyzGuMhijIssxrjIgy+o7Cp2KruKncquYqfyTMUJlV3FCZV3VHw3lVMVJ1R2Fe9Q2VWcUNlVnFiMcZHFGBdZjHGRxRgXefCFihMVO5VXVTyjcqJip7Kr+Akq/4rKruKEyjsqPkllV7FbjHGRxRgXWYxxkcUYF7E/eEJlV7FTeVXFTuWZip3KiYpPU9lVvEplV/GvqOwqdirPVJxQ2VXsVHYVu8UYF1mMcZHFGBdZjHER+4NDKruKncqJin9FZVexU/kJFSdUfkLFO1R2Fa9S2VXsFmNcZDHGRRZjXGQxxkUe/IWK76byTMVOZVexU9lV7FR2Fc+o7Cp2KruKnco7KnYqu4qdyk7lRMUzFTuVXcUnLca4yGKMiyzGuMhijIs8eJPKJ1U8o/LdKt6hckJlV/EOlV3FiYqdygmVZyp2FTuVXcWrFmNcZDHGRRZjXGQxxkUWY1zkwRdUTlTsVF6lcqpip7KrOKFyqmKn8iqVExXPVLxK5UTFKZUTFTuVVy3GuMhijIssxrjIYoyLPPgLFa+q2KnsKk6p7CpOqLxDZVexU3lVxSmVXcVOZVdxQmVX8UzFJ1WcWIxxkcUYF1mMcZHFGBexPziksqvYqXxaxXdT2VWcUtlV7FR2FSdUTlWcUHlVxW+yGOMiizEushjjIosxLvLgCyrfreIdKruKEyonVJ6p2FXsVHYVn1bxSRU7lZ3KMxWfpLKr2C3GuMhijIssxrjIYoyLPPhCxQmVXcUJlVMVJ1R2FScqfoLKruK3q/g0lU9ajHGRxRgXWYxxkcUYF7E/OKRyomKncqLiGZVdxXdTeaZip7KreJXKp1V8ksqpiu+2GOMiizEushjjIosxLvLgG6jsKnYqO5VPU9lVnKh4RmVX8UkVO5WfoHKi4pTKrmKncqJitxjjIosxLrIY4yKLMS6yGOMiD75BxasqfoLKruJUxU5lV/EqlVMVJ1R2FbuKnco7Kr7bYoyLLMa4yGKMiyzGuMiDL6jsKnYqr6rYqXxaxU5lp7KreEZlV3FCZVexq3iHyq7iZosxLrIY4yKLMS6yGOMiD75QsVPZVexUXlXxjMqu4oTKrmKnslN5pmKnsqs4obKrOKWyq9ip/ASVXcV3W4xxkcUYF1mMcZHFGBd58AWVXcVO5VUVO5VnKj5JZVfxjopXVZxQ+U1UPq3iVYsxLrIY4yKLMS6yGOMiD75QcaLikypOqZyoOKHyjoqdyn9RxTtUdiq7ip3KiYrdYoyLLMa4yGKMiyzGuMiDL6j8JhW7ihMq/0rFCZVdxa7ilMonqewqTlXsVD5pMcZFFmNcZDHGRRZjXOTBX6j4birvUNlVvErlmYoTKq9SeUfFCZUTFZ9WsVPZVZxYjHGRxRgXWYxxkcUYF1mMcZEHb1J5VcU7VE6o7Cp2KqdUXlWxUzlR8YzKTmVXcULl01R2FZ+0GOMiizEushjjIosxLvLgP6zihMpO5ber2KmcqjhR8WkqJ1ROqOwqdosxLrIY4yKLMS6yGOMiD/7DVE5UnFD5VypOVLxD5UTFv1KxUzmxGOMiizEushjjIosxLvLgTRX/SsVvUrFT2am8quIZld+u4oTKruLEYoyLLMa4yGKMiyzGuMiDv6Dym6jsKnYqu4pdxU7llMp3U3lHxU7lhMqu4ieo7Cp2izEushjjIosxLrIY4yL2B2NcYjHGRRZjXGQxxkUWY1zkf5Ir7ZPbKZadAAAAAElFTkSuQmCC" alt="Find It! QR code">
+      </div>
+    </div>
+
+    <div class="tonight-header">Tonight&rsquo;s Puzzle</div>
+    <p class="explain-body">Tonight&rsquo;s puzzle is called &ldquo;Quote Contrary&rdquo;. You will be presented with groups of four words, three of which have something in common. You will get points for correctly identifying the commonality for each group. Rearrange the words that don&rsquo;t belong to form a famous quote. You&rsquo;ll get 1 point for each correct word. Additional points can be obtained by correctly identifying the source of the quote.</p>
+    <p class="explain-body"><strong>Example:</strong></p>
+    
+    <div class="ex-wrap">
+      <div class="ex-puzzle-title">Quote Contrary</div>
+      <div class="ex-instructions">In each group, find the word that doesn&rsquo;t belong. The contrary words spell out a well-known quote.</div>
+      
+    <div class="ex-group">
+      <div class="ex-group-label">Group 1</div>
+      <div class="ex-word-row">
+        <div class="ex-word-box ex-solved">BEER</div><div class="ex-word-box">JUICE</div><div class="ex-word-box">SODA</div><div class="ex-word-box">WATER</div>
+      </div>
+      <div class="ex-connection">Connection: <strong>Non-alcoholic beverages</strong></div>
+    </div>
+    <div class="ex-group">
+      <div class="ex-group-label">Group 2</div>
+      <div class="ex-word-row">
+        <div class="ex-word-box">RAYS</div><div class="ex-word-box">REDS</div><div class="ex-word-box">CUBS</div><div class="ex-word-box ex-solved">DOGS</div>
+      </div>
+      <div class="ex-connection">Connection: <strong>MLB teams</strong></div>
+    </div>
+    <div class="ex-group">
+      <div class="ex-group-label">Group 3</div>
+      <div class="ex-word-row">
+        <div class="ex-word-box">PARKS AND RECREATION</div><div class="ex-word-box">BROOKLYN 99</div><div class="ex-word-box ex-solved">COMMUNITY</div><div class="ex-word-box">THE GOOD PLACE</div>
+      </div>
+      <div class="ex-connection">Connection: <strong>Michael Schur productions</strong></div>
+    </div>
+      <div class="ex-quote-section">
+        <div class="ex-quote-label">The Hidden Quote:</div>
+        <div class="ex-quote-reveal">DOGS &nbsp; BEER &nbsp; COMMUNITY</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="feedback">
+      <div class="feedback-drink">Like the puzzle? Buy Rebel a Pup Cup, or her dad a drink. Find a mistake? Rebel&rsquo;s Dad will buy you a drink (but Rebel would still prefer a Pup Cup).</div>
+      <div class="puzzle-copyright">Licensed under CC BY-SA 4.0</div>
+    </div>
+
+  </div>
+
+  <!-- PAGE 2: PUZZLE -->
+  <div class="puzzle-page">
+
+    <div class="brand">Rebel's Puzzles</div>
+    <div class="puzzle-title">Quote Contrary</div>
+    <div class="byline">By Rebel's Dad</div>
+
+    <div class="instructions">In each group, find the word that doesn&rsquo;t belong. The contrary words spell out a well-known quote.</div>
+
+    <div class="groups">
+      <div class="group">
+        <div class="group-label">Group 1</div>
+        <div class="word-row">
+          <div class="word-box">MARY</div><div class="word-box">MERRY</div><div class="word-box">MAURY</div><div class="word-box">MARRY</div>
+        </div>
+        <div class="connection-line">Connection <span class="points">(1 point)</span>: _____________________________________________</div>
+      </div>
+      <div class="group">
+        <div class="group-label">Group 2</div>
+        <div class="word-row">
+          <div class="word-box">CHER</div><div class="word-box">OLIVIA RODRIGO</div><div class="word-box">TAYLOR SWIFT</div><div class="word-box">TINA TURNER</div>
+        </div>
+        <div class="connection-line">Connection <span class="points">(1 point)</span>: _____________________________________________</div>
+      </div>
+      <div class="group">
+        <div class="group-label">Group 3</div>
+        <div class="word-row">
+          <div class="word-box">EXCITED</div><div class="word-box">BOTHERED</div><div class="word-box">ANNOYED</div><div class="word-box">AGITATED</div>
+        </div>
+        <div class="connection-line">Connection <span class="points">(1 point)</span>: _____________________________________________</div>
+      </div>
+      <div class="group">
+        <div class="group-label">Group 4</div>
+        <div class="word-row">
+          <div class="word-box">LADIES</div><div class="word-box">DAMES</div><div class="word-box">QUEENS</div><div class="word-box">WOMEN</div>
+        </div>
+        <div class="connection-line">Connection <span class="points">(1 point)</span>: _____________________________________________</div>
+      </div>
+      <div class="group">
+        <div class="group-label">Group 5</div>
+        <div class="word-row">
+          <div class="word-box">TROUBLE</div><div class="word-box">HAZARD</div><div class="word-box">BACK</div><div class="word-box">EQUAL</div>
+        </div>
+        <div class="connection-line">Connection <span class="points">(1 point)</span>: _____________________________________________</div>
+      </div>
+    </div>
+
+    <div class="hidden-quote">
+      <div class="hidden-quote-title">THE QUOTE</div>
+      <div class="quote-scoring">(1 point for each correct word)</div>
+      <div class="quote-line">THE&nbsp; &nbsp;__________&nbsp; &nbsp;WITH&nbsp; &nbsp;SOME&nbsp; &nbsp;__________&nbsp; &nbsp;IS&nbsp; &nbsp;THAT</div><div class="quote-line">THEY&nbsp; &nbsp;GET&nbsp; &nbsp;ALL&nbsp; &nbsp;__________&nbsp; &nbsp;ABOUT&nbsp; &nbsp;NOTHING&nbsp; &nbsp;AND</div><div class="quote-line">THEN&nbsp; &nbsp;__________&nbsp; &nbsp;HIM</div>
+      
+      <div class="source-fields">
+        
+        <div class="source-line">Speaker of the quote <span class="points">(1 point)</span></div><span class="source-blank">_____________________________________________</span>
+        
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="feedback">
+      <div class="feedback-title">FEEDBACK</div>
+      <div class="feedback-line">Did you like this puzzle? &nbsp; &#9744; Yes &nbsp; &#9744; No &nbsp; &nbsp; How was the difficulty? &nbsp; &#9744; Too Easy &nbsp; &#9744; Just Right &nbsp; &#9744; Too Hard</div>
+      <div class="feedback-line">Did you like the Crossword? &nbsp; &#9744; Yes &nbsp; &#9744; No &nbsp; &nbsp; Did you like the Find It? &nbsp; &#9744; Yes &nbsp; &#9744; No</div>
+      <div class="feedback-drink">Like the puzzle? Buy Rebel a Pup Cup, or her dad a drink. Find a mistake? Rebel&rsquo;s Dad will buy you a drink (but Rebel would still prefer a Pup Cup).</div>
+      <div class="puzzle-copyright">Licensed under CC BY-SA 4.0</div>
+    </div>
+
+  </div>
+
+  <!-- PAGE 3: ANSWER KEY -->
+  <div class="answer-key-page">
+
+    <div class="ak-title">ANSWER KEY</div>
+    <div class="ak-subtitle">Quote Contrary &mdash; Answer Key</div>
+
+    
+  <div class="ak-group">
+    <div class="group-label">Group 1</div>
+    <div class="word-row">
+      <div class="word-box">MARY</div><div class="word-box">MERRY</div><div class="word-box">MAURY</div><div class="word-box ak-contrary">MARRY</div>
+    </div>
+    <div class="connection-line"><span class="ak-conn">Connection: Given names</span></div>
+  </div>
+  <div class="ak-group">
+    <div class="group-label">Group 2</div>
+    <div class="word-row">
+      <div class="word-box ak-contrary">CHER</div><div class="word-box">OLIVIA RODRIGO</div><div class="word-box">TAYLOR SWIFT</div><div class="word-box">TINA TURNER</div>
+    </div>
+    <div class="connection-line"><span class="ak-conn">Connection: Female singers with two names</span></div>
+  </div>
+  <div class="ak-group">
+    <div class="group-label">Group 3</div>
+    <div class="word-row">
+      <div class="word-box ak-contrary">EXCITED</div><div class="word-box">BOTHERED</div><div class="word-box">ANNOYED</div><div class="word-box">AGITATED</div>
+    </div>
+    <div class="connection-line"><span class="ak-conn">Connection: Put off</span></div>
+  </div>
+  <div class="ak-group">
+    <div class="group-label">Group 4</div>
+    <div class="word-row">
+      <div class="word-box">LADIES</div><div class="word-box">DAMES</div><div class="word-box">QUEENS</div><div class="word-box ak-contrary">WOMEN</div>
+    </div>
+    <div class="connection-line"><span class="ak-conn">Connection: Feminine titles</span></div>
+  </div>
+  <div class="ak-group">
+    <div class="group-label">Group 5</div>
+    <div class="word-row">
+      <div class="word-box ak-contrary">TROUBLE</div><div class="word-box">HAZARD</div><div class="word-box">BACK</div><div class="word-box">EQUAL</div>
+    </div>
+    <div class="connection-line"><span class="ak-conn">Connection: Words before 'pay'</span></div>
+  </div>
+
+    <div class="ak-quote-reveal">
+      &#9733; <strong>THE HIDDEN QUOTE:</strong> THE TROUBLE WITH SOME WOMEN IS THAT THEY GET ALL EXCITED ABOUT NOTHING AND THEN MARRY HIM
+    </div>
+    
+        <div class="ak-bonus">
+          
+          <div>&#9733; <strong>Speaker:</strong> CHER</div>
+          
+        </div>
+
+    <div class="ak-theme">&#9733; <strong>Crossword Puzzle Solution:</strong> TURN BACK TIME</div>
+    <div class="ak-theme">&#9733; <strong>Find It! Solution:</strong> SONNY</div>
+
+    <div class="ak-copyright">&#169; Tim Wescott &nbsp;|&nbsp; Licensed under CC BY-SA 4.0</div>
+
+  </div>
+
+</body>
+</html>
