@@ -366,7 +366,8 @@
         <button onclick="toggleMenu('clear-menu')" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors flex items-center gap-1">Clear <span class="text-xs">▾</span></button>
         <div id="clear-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
           <button onclick="clearWord();closeMenus()" class="xw-menu-item">Word</button>
-          <button onclick="clearPuzzle();closeMenus()" class="xw-menu-item">Puzzle</button>
+          <button onclick="clearPuzzle();closeMenus()" class="xw-menu-item">Unrevealed</button>
+          <button onclick="clearAll();closeMenus()" class="xw-menu-item">All</button>
         </div>
       </div>
 
@@ -489,7 +490,14 @@
     <div id="mob-toolbar-strip">
       <button onclick="checkLetter()" class="mob-tool-btn">Check</button>
       <button onclick="revealLetter()" class="mob-tool-btn">Reveal</button>
-      <button onclick="clearWord()" class="mob-tool-btn">Clear</button>
+      <div class="mob-drop-wrap">
+        <button onclick="toggleMenu('mob-clear-menu')" class="mob-tool-btn">Clear ▾</button>
+        <div id="mob-clear-menu" class="mob-drop-menu xw-menu hidden">
+          <button onclick="clearWord();closeMenus()" class="mob-drop-item">Word</button>
+          <button onclick="clearPuzzle();closeMenus()" class="mob-drop-item">Unrevealed</button>
+          <button onclick="clearAll();closeMenus()" class="mob-drop-item">All</button>
+        </div>
+      </div>
       <button id="mob-rebus-btn" onclick="toggleRebus()" class="mob-tool-btn">Rebus</button>
       <button id="mob-autocheck-btn" onclick="toggleAutocheck()" class="mob-tool-btn">Auto&#x2713;</button>
     </div>
@@ -1132,6 +1140,18 @@ function clearPuzzle() {
   for (let r = 0; r < H; r++) {
     for (let c = 0; c < W; c++) {
       if (PUZZLE.grid[r][c].black || cellState[r][c] === 'revealed') continue;
+      userGrid[r][c] = '';
+      cellState[r][c] = null;
+      setCellContent(r, c, '');
+    }
+  }
+  applyHighlights();
+}
+
+function clearAll() {
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      if (PUZZLE.grid[r][c].black) continue;
       userGrid[r][c] = '';
       cellState[r][c] = null;
       setCellContent(r, c, '');
