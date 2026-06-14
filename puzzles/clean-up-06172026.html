@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="https://rebel-the-dog.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clean Up! &bull; Rebel's Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: { DEFAULT: '#9b2226', dark: '#7a1a1e', light: '#fef2f2' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes popin { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
+
+    #hint { letter-spacing: .18em; }
+
+    .blank {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: clamp(20px, 7vw, 30px); height: 2.4rem;
+      border-bottom: 4px solid #94a3b8;
+      font-family: inherit; font-weight: 700;
+      font-size: clamp(1.3rem, 8vw, 2rem); text-transform: uppercase;
+    }
+    .blank.revealed { animation: popin .25s ease; }
+
+    .key {
+      height: 48px; min-width: 30px; flex: 1 1 auto; padding: 0 2px;
+      border: none; border-radius: 6px;
+      background: #d1d5db; color: #1f2937;
+      font-size: .95rem; font-weight: 700; text-transform: uppercase;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      user-select: none; transition: background .15s, color .15s, opacity .15s; font-family: inherit;
+    }
+    .key:hover:not(:disabled) { background: #9ca3af; }
+    .key.correct { background: #538d4e; color: #fff; }
+    .key.absent  { background: #6c6c6c; color: #fff; opacity: .55; }
+    .key:disabled { cursor: default; }
+
+    .dog-part { opacity: 0; transition: opacity .2s ease; }
+  </style>
+</head>
+<body class="bg-sky-50 text-stone-900 font-sans antialiased">
+
+  <nav class="bg-[#1e3a5f] sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+      <a href="" class="font-serif text-lg font-bold text-white hover:text-amber-200 transition-colors shrink-0">Rebel's Blog</a>
+      <div class="flex items-center gap-1 sm:gap-2 text-sm font-medium">
+        <a href="" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Home</a>
+        <a href="posts/" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">Posts</a>
+        <a href="puzzles.html" class="px-3 py-1.5 rounded-md transition-colors text-white bg-[#0f2035]">Puzzles</a>
+        <a href="about.html" class="px-3 py-1.5 rounded-md transition-colors text-sky-200 hover:text-white hover:bg-[#162d4a]">About</a>
+        <a href="feed.xml" class="px-2 py-1.5 text-sky-300 hover:text-orange-400 transition-colors" title="RSS Feed">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="19" r="3"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="max-w-lg mx-auto px-4 py-10 text-center">
+      <h1 class="font-serif text-4xl font-bold mb-1">Clean Up!</h1>
+      <p class="text-stone-500 text-sm mb-6">Guess the word one letter at a time &mdash; six wrong guesses and it&rsquo;s a mess</p>
+
+      <p class="text-xs text-stone-400 uppercase tracking-widest mb-0">Hint</p>
+      <p id="hint" class="font-serif text-2xl font-bold text-brand mb-5">EMANCIPATION</p>
+
+      <svg width="300" viewBox="0 0 320 240" role="img" class="mx-auto mb-2" aria-label="A dog that draws itself with each wrong guess">
+        <line x1="24" y1="210" x2="296" y2="210" stroke="#9a9488" stroke-width="2" stroke-linecap="round"/>
+        <g id="p1" class="dog-part">
+          <path d="M206,118 C224,104 232,86 226,72" fill="none" stroke="#cf9a5e" stroke-width="9" stroke-linecap="round"/>
+          <path d="M206,118 C224,104 232,86 226,72" fill="none" stroke="#6b4423" stroke-width="2" stroke-linecap="round"/>
+          <path d="M118,112 C116,90 154,80 182,92 C206,102 215,124 210,148 C206,168 180,174 156,168 C134,162 120,150 118,130 Z" fill="#cf9a5e" stroke="#6b4423" stroke-width="3"/>
+        </g>
+        <g id="p2" class="dog-part">
+          <path d="M122,100 L102,102 L70,110 L60,116 L66,124 L90,126 L108,128 L122,116 Z" fill="#cf9a5e" stroke="#6b4423" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M55,113 L63,112 L63,120 L56,121 Z" fill="#3a2a1a"/>
+          <path d="M94,109 L102,107 L104,111 L96,112 Z" fill="#3a2a1a"/>
+          <path d="M64,121 L88,124" fill="none" stroke="#6b4423" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+        <g id="p3" class="dog-part">
+          <path d="M93,101 L99,72 L110,100 Z" fill="#b07e44" stroke="#6b4423" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M104,101 L112,68 L122,100 Z" fill="#cf9a5e" stroke="#6b4423" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M109,98 L113,79 L119,98 Z" fill="#a06f36"/>
+        </g>
+        <g id="p4" class="dog-part">
+          <ellipse cx="192" cy="158" rx="20" ry="20" fill="#cf9a5e" stroke="#6b4423" stroke-width="3"/>
+          <path d="M184,170 L188,210" fill="none" stroke="#cf9a5e" stroke-width="11" stroke-linecap="round"/>
+          <path d="M203,170 L206,210" fill="none" stroke="#bd8a4f" stroke-width="11" stroke-linecap="round"/>
+          <ellipse cx="188" cy="210" rx="9" ry="4" fill="#6b4423"/>
+          <ellipse cx="206" cy="210" rx="9" ry="4" fill="#6b4423"/>
+        </g>
+        <g id="p5" class="dog-part">
+          <path d="M130,150 L126,210" fill="none" stroke="#cf9a5e" stroke-width="10" stroke-linecap="round"/>
+          <path d="M148,152 L150,210" fill="none" stroke="#bd8a4f" stroke-width="10" stroke-linecap="round"/>
+          <ellipse cx="126" cy="210" rx="8" ry="4" fill="#6b4423"/>
+          <ellipse cx="150" cy="210" rx="8" ry="4" fill="#6b4423"/>
+        </g>
+        <g id="p6" class="dog-part">
+          <path d="M227,209 C227,199 257,199 257,209 Z" fill="#7a5230" stroke="#4d3318" stroke-width="1.5"/>
+          <path d="M232,200 C232,191 252,191 252,200 Z" fill="#7a5230" stroke="#4d3318" stroke-width="1.5"/>
+          <path d="M237,192 C237,185 247,185 247,192 Z" fill="#7a5230" stroke="#4d3318" stroke-width="1.5"/>
+          <path d="M242,185 L245,180 L239,180 Z" fill="#7a5230" stroke="#4d3318" stroke-width="1.5"/>
+          <path d="M238,176 q4,-6 0,-11" fill="none" stroke="#9a9488" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 4"/>
+          <path d="M249,174 q5,-7 1,-13" fill="none" stroke="#9a9488" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 4"/>
+        </g>
+      </svg>
+
+      <p id="lives" class="text-stone-500 text-sm mb-4">6 guesses before disaster</p>
+
+      <div id="word" class="flex flex-wrap gap-1.5 justify-center mb-2"></div>
+      <p id="msg" class="font-serif text-xl font-bold h-7 mb-3"></p>
+
+      <div id="keyboard" class="flex flex-col gap-1.5 mb-5"></div>
+      <button id="reset" class="px-5 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#162d4a] transition-colors">Play again</button>
+    </div>
+  </main>
+
+  <!-- ── Feedback ────────────────────────────────────────────────────────── -->
+  <style>
+  .fb-chip{cursor:pointer;display:inline-flex;align-items:center;padding:.375rem .875rem;border:1.5px solid #d6d3d1;border-radius:9999px;font-size:.875rem;color:#57534e;transition:all .15s;user-select:none}
+  .fb-chip:has(input:checked){border-color:#1e3a5f;background:#1e3a5f;color:#fff}
+  .fb-chip:hover:not(:has(input:checked)){border-color:#1e3a5f;color:#1e3a5f}
+  </style>
+  <section id="puzzle-feedback" class="max-w-2xl mx-auto px-5 py-8 mt-2 border-t border-stone-200">
+    <h2 class="font-serif text-lg font-bold text-stone-800 mb-4">How&rsquo;d we do?</h2>
+    <form id="fb-form" action="https://formspree.io/f/__FORMSPREE_ID__" method="POST">
+      <input type="hidden" name="puzzle" value="Clean Up! 6/17/2026">
+      <input type="hidden" name="_subject" value="Puzzle Feedback: Clean Up! 6/17/2026">
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">Like this puzzle?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="liked" value="Yes" class="sr-only"><span>&#x1F44D; Yes</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="Meh" class="sr-only"><span>&#x1F937; Meh</span></label>
+          <label class="fb-chip"><input type="radio" name="liked" value="No"  class="sr-only"><span>&#x1F44E; No</span></label>
+        </div>
+      </div>
+      <div class="mb-4">
+        <p class="text-sm font-medium text-stone-700 mb-2">How was the difficulty?</p>
+        <div class="flex gap-2 flex-wrap">
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Easy"   class="sr-only"><span>Too Easy</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Just Right" class="sr-only"><span>Just Right</span></label>
+          <label class="fb-chip"><input type="radio" name="difficulty" value="Too Hard"   class="sr-only"><span>Too Hard</span></label>
+        </div>
+      </div>
+      <div id="fb-comment-wrap" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+        <div class="pb-4">
+          <textarea name="comment" placeholder="Anything else to add? (optional)" rows="3"
+            class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm text-stone-800 resize-none focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"></textarea>
+          <button type="submit"
+            class="mt-2 px-5 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#162d4a] transition-colors">
+            Send feedback
+          </button>
+        </div>
+      </div>
+      <p id="fb-thanks" class="hidden text-sm text-green-700 font-medium mt-2">Thanks for the feedback! &#x1F43E;</p>
+    </form>
+    <p class="text-xs text-stone-400 mt-4">Like the puzzle? Buy Rebel&rsquo;s Dad or Rebel a drink or Pup Cup. Find a mistake? Rebel&rsquo;s Dad will buy you a drink (but Rebel would still prefer a Pup Cup).</p>
+  </section>
+  <script>
+  (function(){
+    var wrap = document.getElementById('fb-comment-wrap');
+    var opened = false;
+    function openForm(){
+      if(opened) return;
+      opened = true;
+      wrap.style.maxHeight = '300px';
+    }
+    document.querySelectorAll('#fb-form input[type="radio"]').forEach(function(r){
+      r.addEventListener('change', openForm);
+    });
+    var form = document.getElementById('fb-form');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      fetch(form.action, {method:'POST', body: new FormData(form), headers:{Accept:'application/json'}})
+        .then(function(){
+          document.getElementById('fb-thanks').classList.remove('hidden');
+          form.querySelector('button[type="submit"]').disabled = true;
+        })
+        .catch(function(){});
+    });
+  }());
+  </script>
+
+  <footer class="bg-[#1e3a5f] mt-16">
+    <div class="max-w-5xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="font-serif text-sky-200 text-sm">&copy; 2026 Rebel's Blog</span>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="feed.xml" class="text-sky-300 hover:text-stone-300 transition-colors">RSS Feed</a>
+        <a href="about.html" class="text-sky-300 hover:text-stone-300 transition-colors">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const ANSWER = atob('SlVORVRFRU5USA=='); // JUNETEENTH
+    const MAX_WRONG = 6;
+
+    let guessed, wrong, over;
+    const parts = [1,2,3,4,5,6].map(i => document.getElementById('p' + i));
+    const wordEl  = document.getElementById('word');
+    const kbEl    = document.getElementById('keyboard');
+    const livesEl = document.getElementById('lives');
+    const msgEl   = document.getElementById('msg');
+
+    function start() {
+      guessed = {}; wrong = 0; over = false;
+      msgEl.textContent = ''; msgEl.className = 'font-serif text-xl font-bold h-7 mb-3';
+      parts.forEach(p => p.style.opacity = 0);
+      buildKeyboard();
+      render();
+      T.track('cleanup_loaded', { answer_len: ANSWER.length });
+    }
+
+    function buildKeyboard() {
+      const ROWS = [
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['Z','X','C','V','B','N','M']
+      ];
+      kbEl.innerHTML = '';
+      ROWS.forEach(keys => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'flex gap-1.5 w-full justify-center';
+        keys.forEach(k => {
+          const btn = document.createElement('button');
+          btn.textContent = k;
+          btn.dataset.key = k;
+          btn.className = 'key';
+          btn.addEventListener('click', () => guess(k));
+          rowEl.appendChild(btn);
+        });
+        kbEl.appendChild(rowEl);
+      });
+    }
+
+    function guess(ch) {
+      if (over || guessed[ch]) return;
+      guessed[ch] = true;
+      const btn = kbEl.querySelector('[data-key="' + ch + '"]');
+      if (btn) btn.disabled = true;
+      const hit = ANSWER.indexOf(ch) !== -1;
+      if (hit) { if (btn) btn.classList.add('correct'); }
+      else {
+        if (btn) btn.classList.add('absent');
+        wrong++;
+        if (parts[wrong - 1]) parts[wrong - 1].style.opacity = 1;
+      }
+      render();
+      const won = ANSWER.split('').every(c => guessed[c]);
+      if (won || wrong >= MAX_WRONG) {
+        T.track('cleanup_complete', { won: won, wrong: wrong });
+      }
+    }
+
+    function render() {
+      wordEl.innerHTML = '';
+      ANSWER.split('').forEach(ch => {
+        const s = document.createElement('span');
+        s.className = 'blank' + (guessed[ch] ? ' revealed' : '');
+        s.textContent = guessed[ch] ? ch : ' ';
+        wordEl.appendChild(s);
+      });
+      const left = MAX_WRONG - wrong;
+      livesEl.textContent = left + ' guess' + (left === 1 ? '' : 'es') + ' before disaster';
+
+      const won = ANSWER.split('').every(c => guessed[c]);
+      if (won) {
+        over = true;
+        msgEl.textContent = 'You did it! Nothing to clean up for now!';
+        msgEl.className = 'font-serif text-xl font-bold h-7 mb-3 text-green-700';
+        lockKeyboard();
+      } else if (wrong >= MAX_WRONG) {
+        over = true;
+        msgEl.textContent = 'Too late! Time to clean up!';
+        msgEl.className = 'font-serif text-xl font-bold h-7 mb-3 text-brand';
+        ANSWER.split('').forEach(c => guessed[c] = true);
+        [...wordEl.children].forEach((s, i) => { s.textContent = ANSWER[i]; });
+        lockKeyboard();
+      }
+    }
+
+    function lockKeyboard() {
+      kbEl.querySelectorAll('button').forEach(b => b.disabled = true);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = (e.key || '').toUpperCase();
+      if (/^[A-Z]$/.test(k)) guess(k);
+    });
+
+    document.getElementById('reset').addEventListener('click', start);
+
+    // ── Telemetry ──────────────────────────────────────────────────────────────
+    const T = (function () {
+      const KEY  = '__POSTHOG_KEY__';
+      const HOST = 'https://us.i.posthog.com';
+      function uid() {
+        try {
+          let v = localStorage.getItem('_ruid');
+          if (!v) {
+            v = (typeof crypto !== 'undefined' && crypto.randomUUID)
+              ? crypto.randomUUID()
+              : Date.now().toString(36) + Math.random().toString(36).slice(2);
+            localStorage.setItem('_ruid', v);
+          }
+          return v;
+        } catch (e) { return 'anon'; }
+      }
+      return {
+        track: function (event, props) {
+          if (!KEY || KEY === '__POSTHOG_KEY__') return;
+          try {
+            const payload = JSON.stringify({
+              api_key: KEY, event: event, distinct_id: uid(),
+              properties: Object.assign({}, props, { $current_url: location.href }),
+            });
+            if (navigator.sendBeacon) navigator.sendBeacon(HOST + '/capture/', payload);
+          } catch (e) {}
+        },
+      };
+    }());
+
+    start();
+  </script>
+</body>
+</html>
