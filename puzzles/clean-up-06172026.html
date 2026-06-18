@@ -74,10 +74,15 @@
   <main>
     <div class="max-w-lg mx-auto px-4 py-10 text-center">
       <h1 class="font-serif text-4xl font-bold mb-1">Clean Up!</h1>
-      <p class="text-stone-500 text-sm mb-6">Guess the word one letter at a time &mdash; six wrong guesses and it&rsquo;s a mess</p>
+      <div class="text-stone-600 text-sm mb-6 max-w-md mx-auto text-left bg-stone-100 border border-stone-200 rounded-lg px-4 py-3">
+        <p class="font-semibold text-stone-800 mb-1">How to play</p>
+        <p>Guess the hidden word one letter at a time using the keyboard below. The <span class="text-brand font-medium">hint</span> points to the answer. Every <span class="font-medium">wrong</span> letter draws another piece of the dog &mdash; <span class="font-medium">six wrong guesses</span> and it&rsquo;s too late to clean up.</p>
+      </div>
 
       <p class="text-xs text-stone-400 uppercase tracking-widest mb-0">Hint</p>
-      <p id="hint" class="font-serif text-2xl font-bold text-brand mb-5">EMANCIPATION</p>
+      <p id="hint" class="font-serif text-2xl font-bold text-brand mb-4">EMANCIPATION</p>
+
+      <div id="word" class="flex flex-wrap gap-1.5 justify-center mb-4"></div>
 
       <svg width="300" viewBox="0 0 320 240" role="img" class="mx-auto mb-2" aria-label="A dog that draws itself with each wrong guess">
         <line x1="24" y1="210" x2="296" y2="210" stroke="#9a9488" stroke-width="2" stroke-linecap="round"/>
@@ -120,9 +125,7 @@
         </g>
       </svg>
 
-      <p id="lives" class="text-stone-500 text-sm mb-4">6 guesses before disaster</p>
-
-      <div id="word" class="flex flex-wrap gap-1.5 justify-center mb-2"></div>
+      <p id="lives" class="text-sm font-semibold mb-3 inline-block px-3 py-1 rounded-full"></p>
       <p id="msg" class="font-serif text-xl font-bold h-7 mb-3"></p>
 
       <div id="keyboard" class="flex flex-col gap-1.5 mb-5"></div>
@@ -276,7 +279,10 @@
         wordEl.appendChild(s);
       });
       const left = MAX_WRONG - wrong;
-      livesEl.textContent = left + ' guess' + (left === 1 ? '' : 'es') + ' before disaster';
+      const base = 'text-sm font-semibold mb-3 inline-block px-3 py-1 rounded-full ';
+      if (left === 1) { livesEl.textContent = '⚠ Last guess — one wrong letter left!'; livesEl.className = base + 'bg-red-100 text-red-700'; }
+      else if (left <= 3) { livesEl.textContent = '⚠ ' + left + ' wrong guesses left'; livesEl.className = base + 'bg-amber-100 text-amber-800'; }
+      else { livesEl.textContent = left + ' wrong guesses left'; livesEl.className = base + 'bg-stone-100 text-stone-600'; }
 
       const won = ANSWER.split('').every(c => guessed[c]);
       if (won) {
