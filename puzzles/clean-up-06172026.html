@@ -127,6 +127,7 @@
 
       <p id="lives" class="text-sm font-semibold mb-3 inline-block px-3 py-1 rounded-full"></p>
       <p id="msg" class="font-serif text-xl font-bold h-7 mb-3"></p>
+      <button id="reveal" class="hidden mb-4 px-5 py-2 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-100 transition-colors">Reveal the answer</button>
 
       <div id="keyboard" class="flex flex-col gap-1.5 mb-5"></div>
       <button id="reset" class="px-5 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#162d4a] transition-colors">Play again</button>
@@ -219,11 +220,13 @@
     const kbEl    = document.getElementById('keyboard');
     const livesEl = document.getElementById('lives');
     const msgEl   = document.getElementById('msg');
+    const revealBtn = document.getElementById('reveal');
 
     function start() {
       guessed = {}; wrong = 0; over = false;
       msgEl.textContent = ''; msgEl.className = 'font-serif text-xl font-bold h-7 mb-3';
       parts.forEach(p => p.style.opacity = 0);
+      revealBtn.classList.add('hidden');
       buildKeyboard();
       render();
       T.track('cleanup_loaded', { answer_len: ANSWER.length });
@@ -294,9 +297,8 @@
         over = true;
         msgEl.textContent = 'Too late! Time to clean up!';
         msgEl.className = 'font-serif text-xl font-bold h-7 mb-3 text-brand';
-        ANSWER.split('').forEach(c => guessed[c] = true);
-        [...wordEl.children].forEach((s, i) => { s.textContent = ANSWER[i]; });
         lockKeyboard();
+        revealBtn.classList.remove('hidden');
       }
     }
 
@@ -311,6 +313,12 @@
     });
 
     document.getElementById('reset').addEventListener('click', start);
+
+    revealBtn.addEventListener('click', () => {
+      ANSWER.split('').forEach(c => guessed[c] = true);
+      [...wordEl.children].forEach((s, i) => { s.textContent = ANSWER[i]; s.classList.add('revealed'); });
+      revealBtn.classList.add('hidden');
+    });
 
     // ── Telemetry ──────────────────────────────────────────────────────────────
     const T = (function () {
