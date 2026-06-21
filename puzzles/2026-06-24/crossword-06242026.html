@@ -90,9 +90,15 @@
     .xw-color-dot.clear { background: #fff; position: relative; }
     .xw-color-dot.clear::after { content: '\00d7'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 12px; line-height: 1; }
     .xw-color-item.active-color { font-weight: 700; background: #eef2ff; }
-    /* When a puzzle uses validated colors, the letter color is the user's paint, so
-       flag wrong cells with a background tint instead of red text. */
-    #xw-grid.has-colors .xw-cell.incorrect { background-color: #fde2e2; }
+    /* In a colour puzzle the solver's font colours own the TEXT channel, so show
+       check state as a CELL BACKGROUND tint and leave the letter colour alone —
+       otherwise a "wrong" red letter is indistinguishable from a rainbow-red fill. */
+    #xw-grid.has-colors .xw-cell.correct   { background-color: #bbf7d0; }
+    #xw-grid.has-colors .xw-cell.incorrect { background-color: #fecaca; }
+    #xw-grid.has-colors .xw-cell.revealed  { background-color: #bfdbfe; }
+    #xw-grid.has-colors .xw-cell.correct .cell-letter,
+    #xw-grid.has-colors .xw-cell.incorrect .cell-letter,
+    #xw-grid.has-colors .xw-cell.revealed .cell-letter { color: inherit; }
     /* First-interaction "look here" cue on the Color button */
     /* Rainbow Color button so the feature is unmistakable */
     .color-btn { background: linear-gradient(90deg,#e40303,#ff8c00,#eab308,#16a34a,#0050ff,#8b00ff); color:#fff !important; border:none !important; }
