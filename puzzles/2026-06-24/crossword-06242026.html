@@ -94,8 +94,11 @@
        flag wrong cells with a background tint instead of red text. */
     #xw-grid.has-colors .xw-cell.incorrect { background-color: #fde2e2; }
     /* First-interaction "look here" cue on the Color button */
-    @keyframes colorCue { 0%{box-shadow:0 0 0 0 rgba(99,102,241,.65)} 70%{box-shadow:0 0 0 11px rgba(99,102,241,0)} 100%{box-shadow:0 0 0 0 rgba(99,102,241,0)} }
-    .color-cue { animation: colorCue 1.25s ease-out 5; border-color:#6366f1 !important; color:#4f46e5 !important; }
+    /* Rainbow Color button so the feature is unmistakable */
+    .color-btn { background: linear-gradient(90deg,#e40303,#ff8c00,#eab308,#16a34a,#0050ff,#8b00ff); color:#fff !important; border:none !important; }
+    .color-btn:hover { filter: brightness(1.08); }
+    @keyframes colorCue { 0%{box-shadow:0 0 0 0 rgba(79,70,229,.75)} 70%{box-shadow:0 0 0 16px rgba(79,70,229,0)} 100%{box-shadow:0 0 0 0 rgba(79,70,229,0)} }
+    .color-cue { animation: colorCue 1.4s ease-out 6; }
     /* Solve celebration: revealer (PRIDE) letters rotate through the rainbow */
     @keyframes prideCycle { 0%{color:#e40303} 14%{color:#ff8c00} 28%{color:#eab308} 42%{color:#008026} 57%{color:#0050ff} 71%{color:#4b0082} 85%{color:#8b00ff} 100%{color:#e40303} }
     .cell-letter.pride-win { animation: prideCycle 1.8s linear infinite; font-weight:700; }
@@ -433,7 +436,7 @@
 
       <!-- Color dropdown (themed puzzles only; items populated by buildPalette) -->
       <div class="relative" id="color-wrap" style="display:none">
-        <button onclick="toggleMenu('color-menu')" class="px-3 py-1.5 border border-navy text-navy rounded text-sm font-medium hover:bg-blue-50 transition-colors flex items-center gap-1">Color <span class="text-xs">▾</span></button>
+        <button onclick="toggleMenu('color-menu')" class="color-btn px-3 py-1.5 rounded text-sm font-bold transition flex items-center gap-1">🎨 Color <span class="text-xs">▾</span></button>
         <div id="color-menu" class="xw-menu hidden absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[150px] max-h-72 overflow-auto"></div>
       </div>
 
@@ -510,7 +513,7 @@
       <button id="mob-rebus-btn" onclick="toggleRebus()" class="mob-tool-btn">Rebus</button>
       <button id="mob-autocheck-btn" onclick="toggleAutocheck()" class="mob-tool-btn">Auto&#x2713;</button>
       <div class="mob-drop-wrap" id="mob-color-wrap" style="display:none">
-        <button onclick="toggleMenu('mob-color-menu')" class="mob-tool-btn">Color &#x25be;</button>
+        <button onclick="toggleMenu('mob-color-menu')" class="mob-tool-btn color-btn">🎨 Color &#x25be;</button>
         <div id="mob-color-menu" class="mob-drop-menu xw-menu hidden"></div>
       </div>
     </div>
@@ -572,6 +575,15 @@ function cellCorrect(r, c) {
   const t = colorTargetAt(r, c);
   return !t || userColor[r][c] === t;
 }
+// Marking state for autocheck/Check: green only when letter AND (themed) colour are
+// right; red only when the LETTER is wrong; neutral (null) when the letter is right
+// but the themed colour isn't chosen yet — so a word never reads "correct" until it
+// is coloured correctly.
+function evalCell(r, c) {
+  if (!userGrid[r][c]) return null;
+  if (userGrid[r][c] !== getSolution(r, c)) return 'incorrect';
+  return cellCorrect(r, c) ? 'correct' : null;
+}
 function applyCellColor(r, c) {
   const el = document.getElementById('letter-' + r + '-' + c);
   if (el) el.style.color = userColor[r][c] || '';
@@ -582,9 +594,7 @@ function applyColor(hex) {
   currentWordCells().forEach(({row, col}) => {
     userColor[row][col] = hex;
     applyCellColor(row, col);
-    if (cellState[row][col] === 'correct' || cellState[row][col] === 'incorrect') {
-      cellState[row][col] = cellCorrect(row, col) ? 'correct' : 'incorrect';
-    }
+    if (autocheck || cellState[row][col]) cellState[row][col] = evalCell(row, col);
   });
   document.querySelectorAll('.xw-color-item').forEach(b => b.classList.toggle('active-color', b.dataset.hex === (hex || '')));
   applyHighlights();
@@ -617,7 +627,7 @@ function buildPalette() {
 }
 buildPalette();
 
-// One-time visual cue (on first interaction) pointing at the new Color control.
+// One-time visual cue pointing at the new Color control (fires on load + first click).
 let colorCueShown = false;
 function showColorCue() {
   if (!HAS_COLORS || colorCueShown) return;
@@ -625,9 +635,10 @@ function showColorCue() {
   ['color-wrap', 'mob-color-wrap'].forEach(id => {
     const wrap = document.getElementById(id);
     const btn = wrap && wrap.querySelector('button');
-    if (btn) { btn.classList.add('color-cue'); setTimeout(() => btn.classList.remove('color-cue'), 7000); }
+    if (btn) { btn.classList.add('color-cue'); setTimeout(() => btn.classList.remove('color-cue'), 9000); }
   });
 }
+if (HAS_COLORS) setTimeout(showColorCue, 700); // draw the eye to it as soon as the puzzle loads
 
 // Celebrate a correct solve: rotate the revealer (PRIDE) letters through the rainbow.
 let prideCelebrated = false;
@@ -1011,15 +1022,14 @@ function handleLetter(letter) {
     cellState[selRow][selCol] = null;
     setCellContent(selRow, selCol, current + letter);
     if (autocheck) {
-      const val = userGrid[selRow][selCol];
-      cellState[selRow][selCol] = val === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+      cellState[selRow][selCol] = evalCell(selRow, selCol);
     }
     applyHighlights();
   } else {
     cellState[selRow][selCol] = null;
     setCellContent(selRow, selCol, letter);
     if (autocheck && letter) {
-      cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+      cellState[selRow][selCol] = evalCell(selRow, selCol);
     }
     advanceInWord();
     checkComplete();
@@ -1041,7 +1051,7 @@ function setLetter(letter) {
   cellState[selRow][selCol] = null;
   setCellContent(selRow, selCol, letter);
   if (autocheck && letter) {
-    cellState[selRow][selCol] = letter === getSolution(selRow, selCol) ? 'correct' : 'incorrect';
+    cellState[selRow][selCol] = evalCell(selRow, selCol);
   }
 }
 
@@ -1173,7 +1183,7 @@ function toggleAutocheck() {
 function checkLetter() {
   if (selRow < 0) return;
   if (userGrid[selRow][selCol]) {
-    cellState[selRow][selCol] = cellCorrect(selRow, selCol) ? 'correct' : 'incorrect';
+    cellState[selRow][selCol] = evalCell(selRow, selCol);
   }
   applyHighlights();
 }
@@ -1182,7 +1192,7 @@ function checkWord() {
   const cells = currentWordCells();
   cells.forEach(({row, col}) => {
     if (userGrid[row][col]) {
-      cellState[row][col] = cellCorrect(row, col) ? 'correct' : 'incorrect';
+      cellState[row][col] = evalCell(row, col);
     }
   });
   applyHighlights();
@@ -1192,7 +1202,7 @@ function checkAll() {
   for (let r = 0; r < H; r++) {
     for (let c = 0; c < W; c++) {
       if (!PUZZLE.grid[r][c].black && userGrid[r][c]) {
-        cellState[r][c] = cellCorrect(r, c) ? 'correct' : 'incorrect';
+        cellState[r][c] = evalCell(r, c);
       }
     }
   }
