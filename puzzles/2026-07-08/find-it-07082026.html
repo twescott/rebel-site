@@ -92,7 +92,7 @@
   <main>
     <div class="max-w-lg mx-auto px-4 py-10 text-center">
       <h1 class="font-serif text-4xl font-bold mb-1">Find It!</h1>
-      <p class="text-stone-500 text-sm mb-8">Guess the 6-letter word &mdash; 6 tries</p>
+      <p class="text-stone-500 text-sm mb-8">Guess the 5-letter word &mdash; 6 tries</p>
 
       <div id="grid" class="flex flex-col gap-1.5 items-center mb-8"></div>
       <div id="keyboard" class="flex flex-col gap-1.5"></div>
@@ -181,7 +181,7 @@
   <script>
     const ANSWER      = atob('QkFDT04='); // BACON
     const MAX_GUESSES = 6;
-    const WORD_LEN    = 6;
+    const WORD_LEN    = 5;
 
     let currentRow = 0, currentCol = 0;
     let currentGuess = [];
